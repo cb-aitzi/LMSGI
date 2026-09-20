@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ejercicio 4 - Lista anidada sin marcador en el último nivel</title>
+
+    <style>
+      .sin-marcador {
+        list-style-type: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Los restaurantes del último nivel no tienen viñeta ( list-style-type: none ) -->
+    <h1>Restaurantes</h1>
+
+    <ul>
+      <li>
+        Balmaseda
+
+        <ul>
+          <li>
+            Tradicional
+
+            <ul class="sin-marcador">
+              <li>Batzoki Balmaseda</li>
+              <li>El Bodegón</li>
+            </ul>
+          </li>
+
+          <li>
+            Internacional
+
+            <ul class="sin-marcador">
+              <li>La Encantada</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        Zalla
+
+        <ul>
+          <li>
+            Tradicional
+
+            <ul class="sin-marcador">
+              <li>Arcos Zalla</li>
+              <li>Zallako Etxea</li>
+            </ul>
+          </li>
+
+          <li>
+            Moderna
+
+            <ul class="sin-marcador">
+              <li>Gaztelumendi</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+</html>

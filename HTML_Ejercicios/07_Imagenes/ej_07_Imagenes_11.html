@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Imagen según orientación</title>
+  </head>
+
+  <body>
+    <!-- <picture> con orientación -->
+        <!-- media puede combinarse con orientation, utilizando portrait y landscape. -->
+    <h1>Imagen adaptativa</h1>
+
+    <picture>
+      <source
+        srcset="img/paisaje_pequeno.jpg"
+        media="(max-width: 640px) and (orientation: landscape)"
+      />
+
+      <source
+        srcset="img/paisaje_grande.jpg"
+        media="(max-width: 640px) and (orientation: portrait)"
+      />
+
+      <img src="img/paisaje_grande.jpg" alt="Paisaje" />
+    </picture>
+  </body>
+</html>

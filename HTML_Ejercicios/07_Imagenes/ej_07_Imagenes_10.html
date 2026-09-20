@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Imágenes adaptativas</title>
+  </head>
+
+  <body>
+    <!-- Utilizar diferentes imágenes según el tamaño de pantalla -->
+     <!-- Se utilizan <picture> y <source> para seleccionar diferentes imágenes según las características de la pantalla. -->
+    <h1>Imagen adaptativa</h1>
+
+    <picture>
+      <source srcset="img/paisaje_pequeno.jpg" media="(max-width: 640px)" />
+
+      <source srcset="img/paisaje_grande.jpg" media="(min-width: 641px)" />
+
+      <img src="img/paisaje_grande.jpg" alt="Paisaje" />
+    </picture>
+  </body>
+</html>

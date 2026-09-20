@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Imágenes según pantalla</title>
+  </head>
+
+  <body>
+    <!-- pantalla pequeña/grande y orientación vertical/horizontal -->
+    <h1>Imágenes adaptativas</h1>
+
+    <picture>
+      <!-- Pantalla pequeña y horizontal -->
+      <source
+        srcset="img/landscape_small.jpg"
+        media="(max-width: 640px) and (orientation: landscape)"
+      />
+
+      <!-- Pantalla pequeña y vertical -->
+      <source
+        srcset="img/portrait_small.jpg"
+        media="(max-width: 640px) and (orientation: portrait)"
+      />
+
+      <!-- Pantalla grande y horizontal -->
+      <source
+        srcset="img/landscape.jpg"
+        media="(min-width: 640px) and (orientation: landscape)"
+      />
+
+      <!-- Pantalla grande y vertical -->
+      <source
+        srcset="img/portrait.jpg"
+        media="(min-width: 640px) and (orientation: portrait)"
+      />
+
+      <!-- Imagen por defecto -->
+      <img src="img/landscape.jpg" alt="Imagen por defecto" />
+    </picture>
+  </body>
+</html>
