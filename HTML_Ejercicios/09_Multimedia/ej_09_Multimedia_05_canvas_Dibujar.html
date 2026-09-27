@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejemplo - Dibujar en canvas</title>
+  </head>
+  <body>
+    <h1>La etiqueta &lt;canvas&gt; en HTML</h1>
+
+    <canvas
+      id="miCanvas"
+      width="400"
+      height="300"
+      style="border: 1px solid black; background-color: #f0f0f0"
+    ></canvas>
+
+    <!-- Este código no forma parte de la unidad didáctica actual -->
+    <script>
+      // --- Obtener el elemento canvas
+      var canvas = document.getElementById("miCanvas");
+      var contexto = canvas.getContext("2d");
+
+      // --- Dibujar un rectángulo
+      contexto.fillStyle = "blue";
+      contexto.fillRect(50, 50, 150, 100);
+
+      // --- Dibujar un círculo
+      contexto.beginPath();
+      contexto.arc(250, 150, 50, 0, 2 * Math.PI);
+      contexto.fillStyle = "red";
+      contexto.fill();
+    </script>
+  </body>
+</html>

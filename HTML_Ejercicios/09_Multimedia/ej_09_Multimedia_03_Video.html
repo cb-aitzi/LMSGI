@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vídeo</title>
+  </head>
+  <body>
+    <h1>Mi vídeo</h1>
+
+    <video controls>
+      <source src="video/How To Embed Video in HTML.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Para establecer el tamaño del vídeo utilizamos width y height -->
+    <video width="640" height="360" controls>
+      <source src="video/How To Embed Video in HTML.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Vídeo con varios formatos. Podemos proporcionar varias fuentes -->
+    <video controls width="640">
+      <source src="video/How To Embed Video in HTML.mp4" type="video/mp4" />
+
+      <source src="video/How To Embed Video in HTML.webm" type="video/webm" />
+
+      Tu navegador no soporta este vídeo.
+    </video>
+
+    <!-- Mediante el atributo muted podemos hacer que el vídeo empiece sin sonido -->
+    <video controls muted>
+      <source src="video/How To Embed Video in HTML.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Mediante el atributo poster podemos mostrar una imagen antes de que se reproduzca el vídeo -->
+     <!-- La imagen poster se muestra mientras el vídeo se está descargando o antes de pulsar Play -->
+    <video controls poster="img/portada_video.png">
+      <source src="video/How To Embed Video in HTML.mp4" type="video/mp4" />
+    </video>
+  </body>
+</html>

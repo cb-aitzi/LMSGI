@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reproducir un archivo de audio</title>
+  </head>
+  <body>
+    <h1>Reproducir un archivo de audio</h1>
+    <!-- El atributo controls hace que aparezcan los controles del reproductor.-->
+    <audio controls>
+      <source src="audio/audio1.mp3" type="audio/mpeg" />
+    </audio>
+
+    <audio>
+      <!-- El audio está incluido, pero no mostramos los controles del reproductor-->
+      <source src="audio/audio1.mp3" type="audio/mpeg" />
+    </audio>
+
+    <!-- Podemos indicar que el audio empiece automáticamente -->
+    <!-- aunque el atributo existe, los navegadores pueden aplicar restricciones a la reproducción automática -->
+    <audio controls autoplay>
+      <source src="audio/audio1.mp3" type="audio/mpeg" />
+    </audio>
+
+    <!-- El atributo loop hace que el audio vuelva a comenzar cuando termina -->
+    <audio controls loop>
+      <source src="audio/audio1.mp3" type="audio/mpeg" />
+    </audio>
+
+    <!-- Con el atributo preload podemos indicar cómo queremos que se cargue el audio -->
+     <!-- auto, metadata, none -->
+    <audio controls preload="metadata">
+      <source src="audio/audio1.mp3" type="audio/mpeg" />
+    </audio>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iframe</title>
+  </head>
+  <body>
+    <!-- Otra posibilidad es no tener el vídeo almacenado en nuestra web -->
+    <!--Podemos incrustar un vídeo de YouTube mediante la etiqueta <iframe> -->
+    <iframe
+      width="560"
+      height="315"
+      src="https://www.youtube.com//embed/9NTrwrfI-X4?si=hwcG4JzroQSwUOcu"
+      title="Vídeo de YouTube"
+      allowfullscreen
+    >
+    </iframe>
+
+    <!-- Muestra dentro de esta página otro recurso externo -->
+    <!-- Los sitios web pueden utilizar mecanismos de seguridad como X-Frame-Options o Content-Security-Policy: frame-ancestors precisamente para impedir que sus páginas sean incrustadas. -->
+    <iframe src="https://www.berria.eus/" width="800" height="500"> </iframe>
+
+    <!-- Insertar un PDF -->
+    <iframe src="documentos/2.6. Enlaces.pdf" width="800" height="600">
+    </iframe>
+  </body>
+</html>

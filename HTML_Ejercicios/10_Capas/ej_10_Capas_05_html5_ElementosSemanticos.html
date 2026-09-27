@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5: usar elementos semánticos</title>
+  </head>
+  <body>
+    <!-- Antiguamente era habitual hacer algo parecido a: -->
+    <div id="header">...</div>
+
+    <div id="main">...</div>
+
+    <div id="sidebar">...</div>
+
+    <div id="footer">...</div>
+
+    <!-- El problema es que todos son <div> y, aunque nosotros sepamos qué significa cada uno por el id, HTML no expresa claramente el significado de cada zona. -->
+    <!-- HTML5 introdujo elementos semánticos -->
+    <header>
+      <!-- Representa la cabecera de una página o sección -->
+      <h1>Mi página web</h1>
+      <p>Bienvenidos</p>
+    </header>
+
+    <nav>
+      <!-- Representa una zona de navegación -->
+      <a href="index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <main>
+      <!-- Representa el contenido principal de la página -->
+      <!-- En una página normalmente tendremos un contenido principal y no varias zonas <main> independientes. -->
+      <h1>Productos</h1>
+      <p>Aquí mostramos nuestros productos.</p>
+    </main>
+
+    <section>
+      <!-- Sirve para dividir el contenido en secciones relacionadas -->
+      <h2>Noticias</h2>
+      <p>Noticias de esta semana.</p>
+    </section>
+    <section>
+      <h2>Eventos</h2>
+      <p>Próximos eventos.</p>
+    </section>
+
+    <article>
+      <!-- Representa un contenido que puede tener sentido por sí mismo -->
+      <!-- Apropiado para: noticias, artículos de blog, publicaciones, entradas, comentarios independientes-->
+      <h2>Nuevo curso de HTML</h2>
+      <p>Esta semana comenzamos un nuevo curso...</p>
+    </article>
+
+    <aside>
+      <!-- Representa contenido relacionado pero secundario -->
+      <!-- Podemos utilizarlo para: barras laterales, enlaces secundarios, información complementaria, publicidad-->
+      <h3>También te puede interesar</h3>
+      <a href="#">Curso de CSS</a>
+      <a href="#">Curso de JavaScript</a>
+    </aside>
+
+    <footer> <!-- Es el pie de página -->
+        <!-- Puede contener: copyright, autoría, información de contacto, enlaces legales, políticas de privacidad-->
+      <p>© 2026 Mi página web</p>
+    </footer>
+  </body>
+</html>
