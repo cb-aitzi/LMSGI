@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UD03 · Parte 2 · La cascada y los selectores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --page:#D8E4E0; --paper:#FFFFFF; --paper2:#EEF4F2; --ink:#12313A; --muted:#456268; --line:#C5D6D1;
+  --accent:#BF3A2A; --teal:#1B7467; --chalk:#F2C94C; --codebg:#10272D; --codeink:#E6F0ED;
+  --mono:'JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,'Courier New',monospace;
+  --head:'Bricolage Grotesque','Segoe UI',system-ui,Arial,sans-serif;
+  --body:'Atkinson Hyperlegible','Segoe UI',system-ui,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0A171B; --paper:#12262C; --paper2:#1A343C; --ink:#E8F1EE; --muted:#9DB8BC; --line:#2C4851;
+    --accent:#FF8878; --teal:#5FCDB8; --codebg:#0A171B;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0A171B; --paper:#12262C; --paper2:#1A343C; --ink:#E8F1EE; --muted:#9DB8BC; --line:#2C4851;
+  --accent:#FF8878; --teal:#5FCDB8; --codebg:#0A171B;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--page);color:var(--ink);font-family:var(--body);font-size:clamp(1rem,1.4vw,1.22rem);line-height:1.5}
+h1,h2,h3{font-family:var(--head);line-height:1.12;margin:0 0 .55em;letter-spacing:-.01em}
+h1{font-size:clamp(2.2rem,5.6vw,4.6rem);font-weight:800}
+h2{font-size:clamp(1.55rem,3.2vw,2.6rem);font-weight:700}
+h3{font-size:1.2em;font-weight:700}
+p{margin:0 0 .8em}
+ul,ol{margin:.2em 0 .8em;padding-left:1.3em}
+li{margin:.25em 0}
+a{color:var(--teal)}
+code,kbd{font-family:var(--mono);font-size:.88em;background:var(--paper2);color:var(--accent);padding:.08em .35em;border-radius:4px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* ---------- Estructura de diapositivas ---------- */
+#deck{position:relative;height:100%}
+.slide{display:none;position:absolute;inset:0;background:var(--paper)}
+.slide.active{display:block}
+.inner{height:100%;overflow-y:auto;display:flex;padding:clamp(1rem,3.2vw,2.8rem) clamp(1rem,5vw,4.5rem) 4.8rem}
+.wrap{margin:auto;width:100%;max-width:1180px}
+.dark{background:#10272D;color:#F4F8F6}
+.dark h1,.dark h2{color:#F4F8F6}
+.dark .lead{color:#A9C4C6}
+.dark code{background:#1B3A42;color:#FFB9AE}
+.divider h2{font-size:clamp(2rem,5vw,4rem)}
+.divider .num{display:inline-block;font-family:var(--head);font-weight:700;font-size:1.1em;color:#10272D;background:var(--chalk);border-radius:999px;padding:.1em .8em;margin-bottom:1rem}
+.lead{font-size:1.15em;color:var(--muted)}
+.small{font-size:.85em;color:var(--muted)}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem;align-items:start}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.2rem;align-items:start}
+.cols-a{display:grid;grid-template-columns:1.1fr .9fr;gap:1.4rem;align-items:start}
+@media (max-width:860px){.cols2,.cols3,.cols-a{grid-template-columns:minmax(0,1fr)}}
+.note{border-left:5px solid var(--teal);background:var(--paper2);padding:.7rem 1rem;border-radius:0 8px 8px 0;margin:1rem 0 0}
+.note.warn{border-color:var(--accent)}
+.note p:last-child{margin-bottom:0}
+.big{font-family:var(--head);font-weight:700;font-size:1.5em;line-height:1.2}
+.q{font-family:var(--head);font-weight:700;color:var(--teal)}
+.scroll{overflow-x:auto}
+
+/* ---------- Tablas ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:.86em}
+.tbl th,.tbl td{padding:.42em .7em;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{background:var(--paper2);font-family:var(--head)}
+.tbl td code{white-space:nowrap}
+
+/* ---------- Bloques de código ---------- */
+.codebox{margin:.4rem 0 .9rem;border-radius:10px;overflow:hidden;background:var(--codebg);color:var(--codeink);border:1px solid var(--line)}
+.codebox .fname{font-family:var(--mono);font-size:.72em;padding:.35em .9em;background:#1B3A42;color:#A9C4C6}
+.codebox pre{margin:0;padding:.8rem 1rem;overflow-x:auto;font-family:var(--mono);font-size:.82em;line-height:1.6;tab-size:2}
+.codebox .s{color:#F2C94C}.codebox .p{color:#7FD1B9}.codebox .v{color:#FFA798}.codebox .c{color:#86A4A8;font-style:italic}
+.codebox .t{color:#8CC7FF}.codebox .a{color:#7FD1B9}.codebox .q{color:#FFB38A}
+.codebox code{background:none;color:inherit;padding:0;border-radius:0;font-size:inherit}
+.codebox.sm pre{font-size:.76em}
+
+/* ---------- Vista previa ---------- */
+.pv{border:2px dashed var(--line);border-radius:10px;padding:1rem;background:#fff;color:#222;font-family:'Times New Roman',Times,serif;font-size:16px;line-height:1.3}
+.pv .pvtitle{display:block;font:600 11px/1 var(--body);color:#667;margin:-.3rem 0 .6rem;letter-spacing:0}
+.cap{font-size:.78em;color:var(--muted);margin:.2rem 0 .8rem}
+
+/* ---------- Controles ---------- */
+.btn,.chip{font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:8px;padding:.3em .75em;cursor:pointer}
+.btn:hover,.chip:hover{background:var(--paper2)}
+.btn[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.chip{font-family:var(--mono);font-size:.78em;border-width:1.5px;padding:.25em .6em}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
+.ctl{display:grid;grid-template-columns:9em 1fr auto;gap:.5rem;align-items:center;margin:.3rem 0;font-size:.88em}
+.ctl output{font-family:var(--mono);font-size:.85em;min-width:3.5em;text-align:right}
+.ctl select,.ctl input[type=text]{font:inherit;padding:.2em .4em;border-radius:6px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink)}
+input[type=range]{accent-color:var(--teal);width:100%}
+.seg{display:flex;flex-wrap:wrap;gap:.3rem}
+.seg .btn{padding:.15em .55em;font-size:.9em;border-width:1.5px}
+
+/* ---------- HUD y navegación ---------- */
+.hud{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:center;gap:.5rem;padding:.4rem clamp(.6rem,2vw,1.2rem);padding-bottom:calc(.4rem + env(safe-area-inset-bottom,0px));background:var(--paper2);border-top:1px solid var(--line)}
+.hud .prog{position:absolute;left:0;top:-3px;height:3px;background:var(--accent);width:0;transition:width .2s}
+.hud .blk{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82em;color:var(--muted)}
+.hud .cnt{font-family:var(--mono);font-size:.8em;min-width:5.5em;text-align:center}
+.hud button{font:inherit;font-size:.9em;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;min-width:2.4rem;height:2.2rem;cursor:pointer}
+.hud button:hover{border-color:var(--ink)}
+.toc{position:fixed;inset:0;z-index:20;background:rgba(8,20,24,.92);display:none;overflow:auto;padding:calc(1.2rem + env(safe-area-inset-top,0px)) 1.2rem calc(1.2rem + env(safe-area-inset-bottom,0px))}
+.toc.open{display:block}
+.toc .box{max-width:980px;margin:0 auto;color:#EAF2EF}
+.toc h2{color:#fff;display:flex;justify-content:space-between;align-items:center}
+.toc h3{margin:1.2rem 0 .4rem;color:var(--chalk);font-size:1.05rem}
+.toc .list{display:flex;flex-wrap:wrap;gap:.35rem}
+.toc button{font:inherit;font-size:.82rem;color:#EAF2EF;background:#1B3A42;border:1px solid #2F5560;border-radius:7px;padding:.3em .6em;cursor:pointer;text-align:left}
+.toc button.cur{background:var(--chalk);color:#10272D;border-color:var(--chalk)}
+.toc .close{font:inherit;font-size:.9rem;background:#fff;color:#10272D;border:0;border-radius:8px;padding:.3em .9em;cursor:pointer}
+
+@media (prefers-reduced-motion:no-preference){
+  .slide.active{animation:fadein .22s ease-out}
+  @keyframes fadein{from{opacity:.0}to{opacity:1}}
+}
+
+/* ---------- Demos concretas ---------- */
+/* Menú de cafetería (con y sin CSS) */
+.cafe h3{margin:0;font-size:1.3em}
+.cafe.on{font-family:Verdana,Geneva,sans-serif;background:#FBF3E4;border-color:#C9A66B}
+.cafe.on h3{color:brown;font-family:Arial,Helvetica,sans-serif;font-size:1.7em;border-bottom:3px solid brown;padding-bottom:.2em;margin-bottom:.5em}
+.cafe.on p{color:#555;font-size:.95em;margin:.25em 0;padding:.3em .6em;background:#fff;border-radius:6px}
+.cafe.on p:nth-of-type(even){background:#F4E6CC}
+
+/* laboratorio de selectores */
+#labdom{font-family:var(--body);font-size:15px}
+#labdom article{border:1.5px solid #9bb;border-radius:8px;padding:.5rem .8rem}
+#labdom h2{font-size:1.25em;margin:.1em 0 .3em;color:#123}
+#labdom p,#labdom li,#labdom span,#labdom h2,#labdom ul{outline:2px solid transparent;outline-offset:1px;border-radius:3px;transition:background .15s}
+#labdom p{margin:.3em 0}
+#labdom ul{margin:.3em 0;padding-left:1.4em}
+#labdom .hit{outline-color:#D9A400;background:rgba(242,201,76,.55)}
+#selres{font-size:.9em;margin-top:.4rem}
+#selres.err{color:var(--accent)}
+
+/* pseudo-clases */
+.ps a.btnlink{display:inline-block;padding:.5em 1em;border-radius:8px;background:#e8eef0;color:#12313A;text-decoration:none;border:2px solid #12313A;font-family:var(--body);font-size:16px}
+.ps a.btnlink:hover{background:#F2C94C}
+.ps a.btnlink:active{background:#BF3A2A;color:#fff}
+.ps a.btnlink:focus{outline:3px dashed #1B7467;outline-offset:3px}
+/* pseudo-elementos */
+.pe p{font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.45;margin:0 0 .8em}
+.pe .a::first-letter{font-size:2.6em;font-weight:700;color:#BF3A2A;float:left;line-height:.9;padding-right:.1em}
+.pe .b::first-line{font-weight:700;color:#1B7467}
+.pe .c::before{content:"Nota: ";font-weight:700;color:#BF3A2A}
+.pe .d::after{content:" (precio con IVA)";color:#667;font-size:.85em}
+
+/* color: mezcladores */
+.sw{height:120px;border-radius:10px;border:2px solid var(--line);background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),linear-gradient(-45deg,#ccc 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ccc 75%),linear-gradient(-45deg,transparent 75%,#ccc 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;background-color:#fff;position:relative;overflow:hidden}
+.sw i{position:absolute;inset:0}
+.vals{font-family:var(--mono);font-size:.85em;margin-top:.6rem;display:grid;gap:.15rem}
+.vals b{display:inline-block;min-width:3.4em;color:var(--muted);font-weight:400}
+.wheelbox{display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap}
+.wheel{position:relative;width:200px;height:200px;border-radius:50%;flex:none;background:conic-gradient(hsl(0 100% 50%),hsl(60 100% 50%),hsl(120 100% 50%),hsl(180 100% 50%),hsl(240 100% 50%),hsl(300 100% 50%),hsl(360 100% 50%))}
+.wheel .core{position:absolute;inset:50px;border-radius:50%;border:4px solid var(--paper)}
+.wheel .dot{position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #000}
+.palette{display:flex;border-radius:10px;overflow:hidden;height:70px;margin:.4rem 0 .2rem}
+.palette span{flex:1;display:flex;align-items:flex-end;padding:.3rem;font-family:var(--mono);font-size:.62em;color:#fff;text-shadow:0 0 3px #000}
+
+/* laboratorio de texto */
+#txtprev{background:#fff;color:#222;border:2px dashed var(--line);border-radius:10px;padding:1rem;min-height:170px;overflow:hidden;font-size:20px}
+
+/* listas */
+.lists ul,.lists ol{background:#fff;color:#222;border:2px dashed var(--line);border-radius:8px;padding:.6rem .6rem .6rem 2.2rem;margin:.3rem 0}
+.lists .cc{font-size:.78em;color:var(--muted);margin-top:.5rem;font-family:var(--mono)}
+
+/* tablas */
+#tbdem{background:#fff;color:#222;border:2px dashed var(--line);border-radius:10px;padding:1rem;overflow-x:auto}
+#tbdem table{font-family:var(--body);font-size:16px}
+#tbdem th,#tbdem td{border:2px solid #1B7467;padding:.4em .9em;min-width:5em}
+#tbdem th{background:#DCEFEA}
+
+/* unidades */
+.unitbox{background:#fff;border:2px dashed var(--line);border-radius:10px;padding:.8rem;color:#222;overflow:hidden}
+.bar{height:2.1rem;border-radius:6px;color:#fff;font-family:var(--mono);font-size:.78em;display:flex;align-items:center;padding:0 .6rem;margin:.35rem 0;white-space:nowrap;overflow:hidden}
+
+/* cascada */
+.nest{border:3px solid var(--teal);border-radius:12px;padding:.8rem;position:relative}
+.nest>.lbl{position:absolute;top:-.85rem;left:.8rem;background:var(--paper);padding:0 .4rem;font-family:var(--mono);font-size:.8em;color:var(--teal)}
+.nest .nest{border-color:var(--accent)}
+.nest .nest>.lbl{color:var(--accent)}
+
+/* autoevaluación */
+details.qz{border:1.5px solid var(--line);border-radius:10px;padding:.55rem .9rem;margin:.45rem 0;background:var(--paper2)}
+details.qz summary{cursor:pointer;font-weight:700;font-family:var(--head)}
+details.qz p{margin:.5rem 0 0}
+
+svg text{font-family:var(--body)}
+svg .mono{font-family:var(--mono)}
+
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{height:auto;background:#fff}
+  :root{padding:0}
+  .hud,.toc{display:none!important}
+  #deck{height:auto}
+  .slide{display:block!important;position:relative;inset:auto;break-after:page;page-break-after:always;min-height:180mm}
+  .inner{height:auto;overflow:visible;padding-bottom:1rem}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+/* ===== EXTRA (partes 4-7 y portada de serie) ===== */
+.series{list-style:none;margin:0;padding:0;counter-reset:s}
+.series li{counter-increment:s;padding:.4em .8em;border:1px solid #2F5560;border-radius:8px;margin:.3rem 0;color:#A9C4C6;font-size:.92em}
+.series li::before{content:"Parte " counter(s) " · ";opacity:.8}
+.series li.cur{background:var(--chalk);color:#10272D;border-color:var(--chalk);font-weight:700}
+.pv.ui{font-family:var(--body);font-size:16px;line-height:1.4}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem .9rem;font-size:.78em;margin:.4rem 0}
+.legend i{display:inline-block;width:.9em;height:.9em;border-radius:3px;margin-right:.3em;vertical-align:-.1em;border:1px solid rgba(0,0,0,.3)}
+.cm{background:#F8CBA0}.cb{background:#555}.cp{background:#BFE3C0}.cc{background:#9CC9F2}
+/* explorador de caja */
+.bx-stage{background:repeating-linear-gradient(45deg,#fff,#fff 8px,#f1f5f4 8px,#f1f5f4 16px);border:2px dashed var(--line);border-radius:10px;padding:10px;overflow-x:auto;color:#222;min-height:150px}
+.bxM{display:inline-block;background:#F8CBA0}
+.bxB{background:#555}
+.bxP{background:#BFE3C0}
+.bxC{background:#9CC9F2;height:56px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#123;overflow:hidden}
+/* cajas genéricas de demo */
+.dbox{background:#9CC9F2;color:#123;border:2px solid #1B7467;font-size:14px;padding:.3em .6em;font-family:var(--body)}
+.stagebox{background:#fff;color:#222;border:2px dashed var(--line);border-radius:10px;padding:.7rem;font-family:var(--body);font-size:15px}
+.stagebox.flow{display:flow-root}
+.mgReplica{display:inline-block;background:#F8CBA0}
+.mgReplica .in{background:#9CC9F2;width:120px;height:56px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#123}
+.bdr div{display:inline-block;width:92px;height:50px;margin:.3rem;border-width:6px;border-color:#1B7467;background:#fff;color:#222;font:12px var(--mono);display:inline-flex;align-items:center;justify-content:center}
+.bgst{height:170px;border:2px solid var(--line);border-radius:8px;background-color:#DCEFEA;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50'><circle cx='25' cy='25' r='18' fill='%23BF3A2A'/><text x='25' y='30' font-size='14' text-anchor='middle' fill='white' font-family='sans-serif'>CSS</text></svg>");background-repeat:repeat}
+.dsp .it{width:80px;height:56px;background:#9CC9F2;border:2px solid #1B7467;color:#123;font-size:14px;vertical-align:top;text-align:center;line-height:52px}
+.ovbox{width:190px;height:70px;border:3px solid #1B7467;background:#fff;color:#222;font-size:14px;padding:4px}
+.zst{position:relative;height:190px;background:#fff;border:2px dashed var(--line);border-radius:8px;overflow:hidden}
+.zst b{position:absolute;width:100px;height:100px;border:2px solid #222;color:#fff;display:flex;align-items:flex-end;padding:4px;font-size:13px}
+/* posicionamiento */
+.posst{position:relative;height:230px;overflow:auto;transform:translateZ(0);background:#fff;color:#222;border:2px dashed var(--line);border-radius:8px;padding:6px;font-size:14px;font-family:var(--body)}
+.posst .s{background:#E1E9E7;border:1px solid #9bb;padding:.35rem;margin-bottom:6px}
+.posst .t{background:#F2C94C;border:2px solid #B8860B;padding:.35rem;width:150px;z-index:2}
+.posst .fill{height:260px;background:repeating-linear-gradient(0deg,#f4f7f6,#f4f7f6 20px,#fff 20px,#fff 40px)}
+/* flexbox */
+.fxc{background:#fff;border:2px dashed var(--line);border-radius:8px;min-height:230px;display:flex;padding:6px;color:#123;font-size:15px}
+.fxc.h{height:230px}
+.fxc .i{background:#9CC9F2;border:2px solid #1B7467;border-radius:6px;padding:8px 14px;min-width:0;text-align:center;font-family:var(--mono);line-height:1.25}
+.fxc .i:nth-child(3n){background:#F2C94C;border-color:#B8860B}
+.fxc .i:nth-child(3n+2){background:#BFE3C0}
+.fxax{display:flex;gap:.5rem;font-size:.8em;margin:.2rem 0 .5rem;flex-wrap:wrap}
+.fxax span{padding:.1em .6em;border-radius:99px;border:1.5px solid}
+/* grid */
+.gdc{background:#fff;border:2px dashed var(--line);border-radius:8px;display:grid;height:250px;padding:6px;color:#123;font-size:15px;overflow:auto}
+.gdc .i{background:#9CC9F2;border:2px solid #1B7467;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);min-height:0;min-width:0;padding:4px}
+.gdc .i:nth-child(3n){background:#F2C94C;border-color:#B8860B}
+.gdc .i:nth-child(3n+2){background:#BFE3C0}
+.gdc .i.sel{background:#BF3A2A;color:#fff;border-color:#7a1f14}
+.gdc.auto{height:auto;min-height:0}
+/* simulador responsive (container queries) */
+.rsOuter{background:var(--paper2);border:2px solid var(--line);border-radius:10px;padding:8px;overflow-x:auto}
+.rsWrap{container-type:inline-size;margin:0 auto;max-width:100%;border:3px solid #222;border-radius:12px;background:#fff;overflow:hidden}
+.rsPage{display:flex;flex-direction:column;gap:6px;padding:6px;font:13px var(--body);color:#123}
+.rsPage>*{padding:8px;border-radius:6px;border:1.5px solid #1B7467;background:#DCEFEA}
+.rsPage .mid{display:flex;flex-direction:column;gap:6px;padding:0;border:0;background:none}
+.rsPage .mid>*{padding:8px;border-radius:6px;border:1.5px solid #1B7467;background:#DCEFEA}
+.rsPage nav{background:#F2C94C;border-color:#B8860B}
+.rsPage aside{background:#BFE3C0}
+.rsPage footer{background:#E1E9E7;border-color:#9bb}
+.rsPage h4{margin:0;font:700 14px var(--head)}
+@container (min-width:640px){.rsPage .mid{flex-direction:row}.rsPage .mid main{flex:1}.rsPage .mid nav{width:130px}}
+@container (min-width:900px){.rsPage .mid aside{width:160px}}
+.rsPage.noaside .mid aside{display:none}
+.rsGal{display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));padding:6px}
+.rsGal div{background:#9CC9F2;border:1.5px solid #1B7467;border-radius:6px;height:60px;display:flex;align-items:center;justify-content:center;font:13px var(--mono);color:#123}
+.rsGal div:nth-child(3n){background:#F2C94C}.rsGal div:nth-child(3n+2){background:#BFE3C0}
+/* vista móvil/viewport */
+.phones{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
+/* formularios */
+.fd label{display:block;margin:.55rem 0 .15rem;font-weight:600}
+.fd input,.fd select,.fd textarea{font:inherit;max-width:100%}
+.fd .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.fout{margin-top:.6rem;background:var(--codebg);color:var(--codeink);font:13px/1.5 var(--mono);padding:.6rem .8rem;border-radius:8px;white-space:pre-wrap;word-break:break-all;min-height:2.6em}
+.fout b{color:#F2C94C;font-weight:400}
+.fd.styled input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.fd.styled select,.fd.styled textarea{border:2px solid #9bb;border-radius:8px;padding:.45em .7em;background:#fff;color:#222;width:100%;box-sizing:border-box}
+.fd.styled input:focus,.fd.styled select:focus,.fd.styled textarea:focus{outline:none;border-color:#1B7467;box-shadow:0 0 0 3px rgba(27,116,103,.25)}
+.fd.styled button{background:#1B7467;color:#fff;border:0;border-radius:8px;padding:.55em 1.2em;font-weight:700;cursor:pointer;margin-top:.7rem}
+.fd.styled button:hover{background:#12594F}
+.fd.styled button[type=reset]{background:#E1E9E7;color:#123}
+.fd.styled fieldset{border:2px solid #C5D6D1;border-radius:10px;margin-top:.7rem}
+.vst input:required{border-left:6px solid #D9A400}
+.vst input:valid{border-color:#1B7467;background:#EAF7F3}
+.vst input:invalid:not(:placeholder-shown){border-color:#BF3A2A;background:#FDECEA}
+.vst input{border:2px solid #9bb;border-radius:6px;padding:.4em .6em;font:inherit;width:100%;box-sizing:border-box}
+.vst input:disabled{opacity:.5}
+.rsForm{display:flex;flex-direction:column;gap:4px;padding:8px;font:13px var(--body);color:#123}
+.rsForm .f{display:flex;flex-direction:column;gap:2px}
+.rsForm input{font:inherit;padding:4px 6px;border:1.5px solid #9bb;border-radius:5px;min-width:0}
+@container (min-width:520px){.rsForm .f{flex-direction:row;align-items:center}.rsForm .f label{width:110px;flex:none}.rsForm .f input{flex:1}}
+@media print{.rsWrap{break-inside:avoid}}
+
+</style>
+</head>
+<body>
+<div id="deck">
+
+<section class="slide dark active" data-title="Portada" data-block="Portada">
+<div class="inner"><div class="wrap">
+<div class="cols-a" style="align-items:center">
+<div><h1>La cascada y los selectores</h1><p class="lead">Qué regla gana cuando hay conflicto y cómo elegir con precisión los elementos a los que se aplica un estilo.</p>
+<p class="lead" style="margin-bottom:0">Lenguajes de marcas y sistemas de gestión de información · 1º DAW · Curso 2026-2027</p></div>
+<div><p class="lead" style="margin-bottom:.4rem">Unidad 3 · CSS</p><ol class="series"><li>Introducción y sintaxis</li><li class="cur">Cascada y selectores</li><li>Unidades, colores y estilo de elementos</li><li>Modelo de cajas</li><li>Maquetación y Flexbox</li><li>Diseño adaptativo y Grid</li><li>Formularios</li></ol></div></div>
+</div></div>
+</section>
+<section class="slide " data-title="Qué vamos a aprender" data-block="Cascada y selectores">
+<div class="inner"><div class="wrap">
+<h2>Qué vamos a aprender</h2><div class="cols2"><div><p class="lead">Al terminar esta parte serás capaz de:</p><ul><li>Predecir qué estilo se aplica cuando varias reglas se contradicen.</li><li>Usar selectores de etiqueta, clase, id, atributo y jerárquicos.</li><li>Aplicar estilos según el estado o la posición con pseudo-clases y pseudo-elementos.</li><li>Calcular la especificidad de un selector.</li></ul></div><div><p class="lead">Contenido</p><ol><li>La cascada: prioridad, herencia y orden</li><li>Selectores simples y combinados</li><li>Selectores de atributo y jerárquicos</li><li>Pseudo-clases y pseudo-elementos</li><li>Especificidad</li></ol><div class="note"><p>Practica con el laboratorio de selectores: es la mejor forma de entenderlos.</p></div></div></div>
+</div></div>
+</section>
+<section class="slide dark divider" data-title="3 · La cascada" data-block="La cascada" data-divider="3">
+<div class="inner"><div class="wrap">
+  <span class="num">Sección 1</span>
+  <h2>La cascada: ¿qué regla gana?</h2>
+  <p class="lead">Qué pasa cuando dos reglas dicen cosas contrarias sobre el mismo elemento.</p>
+</div></div>
+</section><section class="slide" data-title="Cuando hay conflicto" data-block="La cascada">
+<div class="inner"><div class="wrap">
+  <h2>Cuando dos reglas se contradicen</h2>
+  <p>Puede que a un mismo elemento le lleguen estilos distintos. ¿De qué color se verá «Kaixo»?</p>
+  <div class="cols2">
+    <div>
+      <script type="text/x-code" data-lang="html" data-file="index.html">
+<head>
+  <style>
+    p { color: blue; }
+  </style>
+</head>
+<body>
+  <p style="color: red;">Kaixo</p>
+</body>
+      </script>
+    </div>
+    <div>
+      <div class="pv"><span class="pvtitle">Resultado</span><span style="color:red;font-size:1.6em">Kaixo</span></div>
+      <p style="margin-top:.8rem"><strong>Rojo.</strong> Cuando las reglas se contradicen, gana la <strong>más específica</strong>. El atributo <code>style</code> apunta a un único elemento, así que es más específico que <code>p</code>, que apunta a todos los párrafos.</p>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Escalera de prioridad" data-block="La cascada">
+<div class="inner"><div class="wrap">
+  <h2>Escalera de prioridad: de menos a más</h2>
+  <svg viewBox="0 0 900 290" role="img" aria-label="Escalera de prioridad de cuatro peldaños: estilos del navegador, hojas externas e internas, atributo style y !important" style="width:100%;height:auto">
+    <g font-size="17" font-weight="700">
+      <rect x="10" y="210" width="210" height="70" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/>
+      <text x="115" y="238" text-anchor="middle" fill="var(--ink)">1 · Navegador</text>
+      <text x="115" y="260" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">estilos por defecto</text>
+      <rect x="235" y="150" width="210" height="130" rx="6" fill="var(--paper2)" stroke="var(--teal)" stroke-width="2"/>
+      <text x="340" y="180" text-anchor="middle" fill="var(--ink)">2 · Hojas CSS</text>
+      <text x="340" y="204" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">externas (link) e internas</text>
+      <text x="340" y="224" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">(style en el head)</text>
+      <text x="340" y="250" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">si empatan, gana la última</text>
+      <rect x="460" y="90" width="210" height="190" rx="6" fill="var(--paper2)" stroke="var(--teal)" stroke-width="3"/>
+      <text x="565" y="124" text-anchor="middle" fill="var(--ink)">3 · Inline</text>
+      <text x="565" y="148" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">atributo style</text>
+      <text x="565" y="168" text-anchor="middle" font-size="13" font-weight="400" fill="var(--muted)">en el propio elemento</text>
+      <rect x="685" y="30" width="205" height="250" rx="6" fill="var(--accent)"/>
+      <text x="787" y="70" text-anchor="middle" fill="#fff">4 · !important</text>
+      <text x="787" y="94" text-anchor="middle" font-size="13" font-weight="400" fill="#fff">fuerza un valor</text>
+      <text x="787" y="114" text-anchor="middle" font-size="13" font-weight="400" fill="#fff">por encima del resto</text>
+    </g>
+  </svg>
+  <div class="note"><p>Cuanto más arriba en la escalera, más prioridad. Si dos reglas están al <strong>mismo nivel</strong> y se contradicen, gana la que aparece <strong>más tarde</strong> en el código.</p></div>
+</div></div>
+</section><section class="slide" data-title="Orden y !important" data-block="La cascada">
+<div class="inner"><div class="wrap">
+  <h2>El último gana, salvo con !important</h2>
+  <div class="cols2">
+    <div>
+      <h3>Propiedad repetida: gana la última</h3>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+p {
+  font-family: Arial;
+  font-family: Verdana; /* esta gana */
+}
+      </script>
+      <h3>!important cambia el resultado</h3>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+p {
+  font-family: Arial !important; /* esta gana */
+  font-family: Verdana;
+}
+      </script>
+    </div>
+    <div>
+      <p>Con <code>!important</code> forzamos que un valor tenga prioridad, aunque haya otro más abajo.</p>
+      <div class="note warn"><p><strong>Úsalo lo menos posible.</strong> Cuando todo es «importante», ya nada lo es, y el CSS se vuelve muy difícil de mantener. Si necesitas <code>!important</code> a menudo, probablemente tus selectores están mal planteados.</p></div>
+      <div class="note"><p>Otra norma: si dos reglas vienen de dos archivos externos enlazados con <code>&lt;link&gt;</code>, tiene prioridad el <strong>último</strong> que aparece en el HTML.</p></div>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Herencia: elementos anidados" data-block="La cascada">
+<div class="inner"><div class="wrap">
+  <h2>Elementos anidados: el más interno manda</h2>
+  <div class="cols2">
+    <div>
+      <p>Muchas propiedades (como el color del texto) pasan <strong>de padres a hijos</strong>. Esto se llama <strong>herencia</strong>.</p>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+p { color: red; }
+strong { color: blue; }
+      </script>
+      <script type="text/x-code" data-lang="html" data-file="index.html">
+<p>Hoy el café es <strong>gratis</strong>
+   para todos.</p>
+      </script>
+    </div>
+    <div>
+      <div class="nest"><span class="lbl">&lt;p&gt; · color: red</span>
+        <span style="color:red">Hoy el café es</span>
+        <span class="nest" style="display:inline-block;padding:.2rem .6rem;margin:0 .2rem"><span class="lbl">&lt;strong&gt;</span><span style="color:blue;font-weight:700">gratis</span></span>
+        <span style="color:red">para todos.</span>
+      </div>
+      <p style="margin-top:.8rem">El <code>&lt;strong&gt;</code> está <em>dentro</em> del <code>&lt;p&gt;</code>. Sin regla propia heredaría el rojo; como tiene la suya, se ve <strong style="color:blue">azul</strong>.</p>
+      <div class="note"><p>Regla práctica: lo <strong>más interno</strong> y lo <strong>más específico</strong> prevalece.</p></div>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Organizar el CSS" data-block="La cascada">
+<div class="inner"><div class="wrap">
+  <h2>Un CSS ordenado se mantiene mejor</h2>
+  <p>Reglas repetidas, reglas que nunca se usan, propiedades heredadas que pasan desapercibidas... ¿cuánto tardarías en encontrar una regla entre mil líneas? La solución es <strong>organizarse</strong>:</p>
+  <div class="cols2">
+    <ul>
+      <li>Ordenar las reglas <strong>alfabéticamente</strong>: <code>a</code>, <code>div</code>, <code>em</code>, <code>#primera</code>...</li>
+      <li>O en el <strong>mismo orden que aparecen en el HTML</strong>: <code>html</code>, <code>body</code>, <code>h1</code>, <code>h2</code>...</li>
+      <li>O <strong>agrupadas por función</strong>: bordes, colores, maquetación...</li>
+    </ul>
+    <div>
+      <ul>
+        <li>Ordenar las propiedades dentro de la regla alfabéticamente, o <strong>de fuera hacia dentro</strong> (<code>margin</code>, <code>border</code>, <code>padding</code>, <code>text-align</code>, <code>font-size</code>).</li>
+        <li><strong>¡Y comentar!</strong> Un buen comentario ahorra mucho tiempo.</li>
+      </ul>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+/* ===== Cabecera ===== */
+h1 {
+  margin: 0;
+  padding: 10px;
+  color: brown;
+  font-size: 36px;
+}
+      </script>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide dark divider" data-title="4 · Selectores" data-block="Selectores" data-divider="4">
+<div class="inner"><div class="wrap">
+  <span class="num">Sección 2</span>
+  <h2>Selectores: elegir a quién se aplica cada estilo</h2>
+  <p class="lead">La habilidad más importante para escribir buen CSS.</p>
+</div></div>
+</section><section class="slide" data-title="Qué es un selector" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>¿Qué es un selector?</h2>
+  <p class="lead">Es el patrón que dice <strong>a qué elementos HTML</strong> se aplicará el estilo. Es como la dirección en un sobre: decide quién recibe el paquete.</p>
+  <div class="cols3">
+    <div>
+      <h3>Selectores simples</h3>
+      <ul>
+        <li>Universal <code>*</code></li>
+        <li>De tipo o etiqueta <code>p</code></li>
+        <li>De clase <code>.alerta</code></li>
+        <li>De id <code>#cabecera</code></li>
+        <li>De atributo <code>[href]</code></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Selectores jerárquicos</h3>
+      <ul>
+        <li>De descendiente <code>div p</code></li>
+        <li>De hijo <code>ul &gt; li</code></li>
+        <li>De hermano adyacente <code>h2 + p</code></li>
+        <li>De hermano general <code>h2 ~ p</code></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Otros</h3>
+      <ul>
+        <li>Pseudo-clases <code>a:hover</code></li>
+        <li>Pseudo-elementos <code>p::first-letter</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><p>Una buena selección da hojas de estilo coherentes y fáciles de mantener. Lo ideal: HTML y CSS <strong>independientes</strong>, para dar formato sin tocar el HTML. Para eso hace falta un HTML bien estructurado y dominar los selectores.</p></div>
+</div></div>
+</section><section class="slide" data-title="Selector universal y de tipo" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Selector universal y selector de tipo</h2>
+  <div class="cols2">
+    <div>
+      <h3>Universal <code>*</code></h3>
+      <p>Selecciona <strong>todos</strong> los elementos de la página. Se usa mucho para «resetear» márgenes y rellenos.</p>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+      </script>
+    </div>
+    <div>
+      <h3>De tipo (etiqueta)</h3>
+      <p>Selecciona <strong>todos los elementos</strong> de ese tipo: <code>p</code>, <code>h1</code>, <code>div</code>...</p>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+h1 {
+  color: darkgreen;
+  font-size: 24px;
+}
+p {
+  line-height: 1.5;
+}
+      </script>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Selector de clase" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Selector de clase: <code style="font-size:.8em">.nombre</code></h2>
+  <p>Sirve para distinguir elementos <strong>del mismo tipo</strong> (por ejemplo, un párrafo de otro). En el HTML se pone <code>class="..."</code>; en el CSS, un <strong>punto</strong> delante del nombre. Una clase <strong>se puede repetir</strong> en muchos elementos.</p>
+  <div class="cols2">
+    <div>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+.alert {
+  background-color: yellow;
+  padding: 10px;
+  border: 1px solid red;
+}
+.success {
+  background-color: lightgreen;
+}
+      </script>
+      <script type="text/x-code" data-lang="html" data-file="index.html">
+<div class="alert">Este es un mensaje de alerta.</div>
+<div class="success">Este es un mensaje de éxito.</div>
+      </script>
+    </div>
+    <div>
+      <div class="pv"><span class="pvtitle">Resultado</span>
+        <div style="background:yellow;padding:10px;border:1px solid red;margin-bottom:.5rem">Este es un mensaje de alerta.</div>
+        <div style="background:lightgreen">Este es un mensaje de éxito.</div>
+      </div>
+      <p style="margin-top:.8rem"><strong>Varias clases:</strong> <code>class="alert grande"</code> aplica ambas. En CSS, <code>.alert.grande</code> (pegadas, sin espacio) solo afecta a los elementos que tienen <em>las dos</em>.</p>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Selector de id" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Selector de id: <code style="font-size:.8em">#nombre</code></h2>
+  <div class="cols2">
+    <div>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+#main-header {
+  background-color: blue;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+      </script>
+      <script type="text/x-code" data-lang="html" data-file="index.html">
+<h1 id="main-header">
+  Bienvenido a nuestra Cafetería
+</h1>
+      </script>
+      <div class="pv"><span class="pvtitle">Resultado</span><div style="background:blue;color:#fff;text-align:center;padding:20px;font-size:1.4em;font-weight:700;font-family:Arial,sans-serif">Bienvenido a nuestra Cafetería</div></div>
+    </div>
+    <div>
+      <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th></th><th>Clase</th><th>Id</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Símbolo</strong></td><td><code>.</code></td><td><code>#</code></td></tr>
+          <tr><td><strong>¿Se repite en la página?</strong></td><td>Sí, en muchos elementos</td><td><strong>No</strong>, es único</td></tr>
+          <tr><td><strong>Para...</strong></td><td>Grupos de elementos</td><td>Un elemento concreto</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="note warn"><p>Un <code>id</code> no se debe repetir dentro de una página. Aunque el navegador lo permita, se pierde la ventaja de identificar un elemento de forma única.</p></div>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Agrupar y combinar selectores" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Agrupar y combinar selectores</h2>
+  <div class="cols2">
+    <div>
+      <h3>Agrupar con comas</h3>
+      <p>Aplica las mismas reglas a varios selectores a la vez.</p>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+h1, h2, p {
+  color: brown;
+  margin-bottom: 10px;
+}
+      </script>
+    </div>
+    <div>
+      <h3>Combinar (más precisión)</h3>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+/* párrafos con la clase alert */
+p.alert { font-weight: bold; }
+
+/* elementos .alert dentro de #main-header */
+#main-header .alert { color: orange; }
+
+/* párrafos dentro de un div.success */
+div.success p { color: green; }
+      </script>
+    </div>
+  </div>
+  <div class="note"><p><strong>Cuidado con el espacio:</strong> <code>p.alert</code> (pegado) = un párrafo <em>con</em> clase alert. <code>p .alert</code> (con espacio) = elementos con clase alert <em>dentro</em> de un párrafo. Son cosas distintas.</p></div>
+</div></div>
+</section><section class="slide" data-title="Selectores de atributo" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Selectores de atributo</h2>
+  <p>Seleccionan elementos según sus <strong>atributos HTML</strong> (<code>href</code>, <code>type</code>, <code>class</code>...) y, si hace falta, su valor.</p>
+  <div class="scroll">
+  <table class="tbl">
+    <thead><tr><th>Selector</th><th>Selecciona los elementos...</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>[attr]</code></td><td>que tienen el atributo, sea cual sea su valor</td><td><code>input[type] { border: 1px solid black; }</code></td></tr>
+      <tr><td><code>[attr="valor"]</code></td><td>cuyo atributo vale exactamente ese valor</td><td><code>input[type="text"] { background-color: yellow; }</code></td></tr>
+      <tr><td><code>[attr~="valor"]</code></td><td>cuyo atributo es una lista de palabras y una es ese valor</td><td><code>[title~="cafe"] { color: brown; }</code></td></tr>
+      <tr><td><code>[attr^="valor"]</code></td><td>cuyo valor <strong>empieza</strong> por...</td><td><code>[href^="https"] { color: green; }</code></td></tr>
+      <tr><td><code>[attr$="valor"]</code></td><td>cuyo valor <strong>termina</strong> en...</td><td><code>[href$=".pdf"] { color: red; }</code></td></tr>
+      <tr><td><code>[attr*="valor"]</code></td><td>cuyo valor <strong>contiene</strong>...</td><td><code>[class*="icon"] { font-size: 24px; }</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note"><p><strong>Mnemotecnia:</strong> <code>^</code> es el comienzo (como en las expresiones regulares), <code>$</code> el final y <code>*</code> «en cualquier parte».</p></div>
+</div></div>
+</section><section class="slide" data-title="Selectores jerárquicos" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Selectores jerárquicos: la familia del HTML</h2>
+  <div class="cols-a" style="align-items:center">
+    <svg viewBox="0 0 560 270" role="img" aria-label="Árbol de elementos: article contiene h2, p, ul y p; ul contiene tres li; el último p contiene un span" style="width:100%;height:auto">
+      <g stroke="var(--muted)" stroke-width="2" fill="none">
+        <path d="M280 52 V72 H70 V92 M280 72 H200 V92 M280 72 H360 V92 M280 72 H490 V92"/>
+        <path d="M360 128 V148 H320 V168 M360 148 V168 M360 148 H400 V168"/>
+        <path d="M490 128 V168"/>
+      </g>
+      <g font-size="16" font-weight="700" text-anchor="middle">
+        <rect x="225" y="22" width="110" height="30" rx="6" fill="var(--teal)"/><text x="280" y="43" fill="#fff">article</text>
+        <rect x="35" y="98" width="70" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="70" y="119" fill="var(--ink)">h2</text>
+        <rect x="150" y="98" width="100" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="200" y="119" fill="var(--ink)">p.nota</text>
+        <rect x="325" y="98" width="70" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="360" y="119" fill="var(--ink)">ul</text>
+        <rect x="455" y="98" width="70" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="490" y="119" fill="var(--ink)">p</text>
+        <rect x="295" y="174" width="50" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="320" y="195" fill="var(--ink)">li</text>
+        <rect x="345" y="174" width="30" height="0" fill="none"/>
+        <rect x="337" y="174" width="50" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2" transform="translate(23 0)"/><text x="385" y="195" fill="var(--ink)">li</text>
+        <rect x="455" y="174" width="70" height="30" rx="6" fill="var(--paper2)" stroke="var(--line)" stroke-width="2"/><text x="490" y="195" fill="var(--ink)">span</text>
+      </g>
+      <text x="280" y="240" text-anchor="middle" font-size="14" fill="var(--muted)">article es el padre de h2, p, ul y p.</text>
+      <text x="280" y="260" text-anchor="middle" font-size="14" fill="var(--muted)">Los li son hijos de ul y descendientes de article.</text>
+    </svg>
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>Símbolo</th><th>Nombre</th><th>Ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td>espacio</td><td>Descendiente</td><td><code>article li</code></td></tr>
+          <tr><td><code>&gt;</code></td><td>Hijo directo</td><td><code>ul &gt; li</code></td></tr>
+          <tr><td><code>+</code></td><td>Hermano adyacente</td><td><code>h2 + p</code></td></tr>
+          <tr><td><code>~</code></td><td>Hermano general</td><td><code>h2 ~ p</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="cols2" style="margin-top:.8rem">
+    <ul>
+      <li><strong>Descendiente</strong> (espacio): cualquier nivel dentro del padre (hijos, nietos...).</li>
+      <li><strong>Hijo</strong> (<code>&gt;</code>): solo los hijos <em>directos</em>.</li>
+    </ul>
+    <ul>
+      <li><strong>Adyacente</strong> (<code>+</code>): el hermano que va <em>justo después</em>.</li>
+      <li><strong>General</strong> (<code>~</code>): <em>todos</em> los hermanos que van después.</li>
+    </ul>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Laboratorio de selectores" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Laboratorio: ¿qué elementos selecciona?</h2>
+  <p>Pulsa un selector y mira qué se ilumina. Predice antes el resultado. También puedes escribir el tuyo.</p>
+  <div class="chips" id="chips"></div>
+  <div class="cols2">
+    <div class="pv" id="labdom">
+      <article>
+        <h2>Cafés</h2>
+        <p class="nota">Precios con IVA</p>
+        <ul>
+          <li>Americano</li>
+          <li class="top">Cappuccino</li>
+          <li>Latte</li>
+        </ul>
+        <p>Abierto <span>todos los días</span></p>
+      </article>
+    </div>
+    <div>
+      <script type="text/x-code" data-lang="html" data-file="HTML de la demo">
+<article>
+  <h2>Cafés</h2>
+  <p class="nota">Precios con IVA</p>
+  <ul>
+    <li>Americano</li>
+    <li class="top">Cappuccino</li>
+    <li>Latte</li>
+  </ul>
+  <p>Abierto <span>todos los días</span></p>
+</article>
+      </script>
+      <div class="ctl" style="grid-template-columns:auto 1fr"><label for="selin">Tu selector:</label><input type="text" id="selin" placeholder="p, .top, ul > li..." autocomplete="off" spellcheck="false"></div>
+      <div id="selres" aria-live="polite"></div>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Pseudo-clases" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Pseudo-clases: elegir por estado o posición</h2>
+  <p>Seleccionan un elemento según un <strong>estado</strong> (el ratón está encima, tiene el foco...) o su <strong>posición</strong> entre hermanos. Se escriben con <strong>dos puntos</strong>: <code>a:hover</code>.</p>
+  <div class="cols2">
+    <div class="scroll">
+      <table class="tbl">
+        <thead><tr><th>Pseudo-clase</th><th>Cuándo se aplica</th></tr></thead>
+        <tbody>
+          <tr><td><code>:link</code></td><td>enlace aún no visitado</td></tr>
+          <tr><td><code>:visited</code></td><td>enlace ya visitado</td></tr>
+          <tr><td><code>:hover</code></td><td>el ratón está encima (sin clic)</td></tr>
+          <tr><td><code>:active</code></td><td>mientras se hace clic</td></tr>
+          <tr><td><code>:focus</code></td><td>el elemento tiene el foco (tecla Tab, campo activo)</td></tr>
+          <tr><td><code>:disabled</code></td><td>elemento deshabilitado</td></tr>
+          <tr><td><code>:first-child</code> / <code>:last-child</code></td><td>primer / último hijo de su padre</td></tr>
+          <tr><td><code>:nth-child(n)</code></td><td>hijo en la posición <em>n</em>: <code>2</code>, <code>odd</code>, <code>even</code></td></tr>
+          <tr><td><code>:only-child</code></td><td>el único hijo</td></tr>
+          <tr><td><code>:first-of-type</code>...</td><td>igual, pero contando solo elementos del mismo tipo</td></tr>
+          <tr><td><code>:not(selector)</code></td><td>los que <strong>no</strong> coinciden</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="pv ps"><span class="pvtitle">Pruébalo: pasa el ratón, haz clic y usa Tab</span>
+        <a class="btnlink" href="#" onclick="return false">Pedir un café</a>
+      </div>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+a:hover  { background: #F2C94C; }
+a:active { background: #BF3A2A; }
+a:focus  { outline: 3px dashed teal; }
+
+tr:nth-child(odd) {
+  background-color: lightblue;
+}
+p:not(.nota) { color: black; }
+      </script>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Pseudo-elementos" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Pseudo-elementos: elegir una parte de un elemento</h2>
+  <p>Afectan a una <strong>parte</strong> del elemento (su primera letra, su primera línea) o <strong>crean contenido</strong> antes o después. Se escriben con <strong>dos</strong> dos puntos: <code>::first-letter</code>.</p>
+  <div class="cols2">
+    <div class="pv pe"><span class="pvtitle">Resultado</span>
+      <p class="a">Esta cafetería abre todos los días desde las ocho de la mañana. El café es de comercio justo.</p>
+      <p class="b">Aquí solo se destaca la primera línea de este párrafo, que depende del ancho de la pantalla y se corta donde llegue.</p>
+      <p class="c">Hoy no hay leche de avena.</p>
+      <p class="d">Café Americano 1,60 €</p>
+    </div>
+    <div>
+      <script type="text/x-code" data-lang="css" data-file="estilos.css">
+p::first-letter { font-size: 2.6em; color: #BF3A2A; }
+p::first-line   { font-weight: bold; }
+p::before { content: "Nota: "; font-weight: bold; }
+p::after  { content: " (precio con IVA)"; }
+      </script>
+      <div class="note"><p><strong>Pseudo-clase o pseudo-elemento:</strong> la pseudo-clase es un <em>estado</em> o <em>condición</em> del elemento (<code>:hover</code>, <code>:nth-child()</code>). El pseudo-elemento es una <em>parte</em> o un contenido añadido (<code>::before</code>, <code>::first-letter</code>).</p></div>
+      <p class="small">En los materiales verás <code>:before</code> con un solo punto; es la sintaxis antigua. Hoy se recomienda <code>::before</code>.</p>
+    </div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Especificidad" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Si dos selectores chocan, gana el más específico</h2>
+  <p>Cada selector «puntúa» según lo que contiene. Se compara columna a columna, de izquierda a derecha:</p>
+  <div class="scroll">
+  <table class="tbl">
+    <thead><tr><th>Selector</th><th>ids</th><th>clases, atributos, pseudo-clases</th><th>etiquetas</th></tr></thead>
+    <tbody>
+      <tr><td><code>p</code></td><td>0</td><td>0</td><td>1</td></tr>
+      <tr><td><code>.alert</code></td><td>0</td><td>1</td><td>0</td></tr>
+      <tr><td><code>p.alert</code></td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td><code>div.success p</code></td><td>0</td><td>1</td><td>2</td></tr>
+      <tr><td><code>#main-header</code></td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td><code>#main-header .alert</code></td><td>1</td><td>1</td><td>0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="cols2">
+    <div class="note"><p><strong>En orden de fuerza:</strong> id &gt; clase / atributo / pseudo-clase &gt; etiqueta. Un solo id vence a cualquier número de clases.</p></div>
+    <div class="note"><p><strong>Ejemplo:</strong> con <code>#main-header</code> y <code>p.alert</code> sobre el mismo elemento, gana <code>#main-header</code>. Si hay empate, gana la regla que va <em>después</em>.</p></div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Resumen de selectores" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Chuleta de selectores</h2>
+  <div class="cols2">
+    <div class="scroll"><table class="tbl">
+      <thead><tr><th>Selector</th><th>Ejemplo</th><th>Selecciona</th></tr></thead>
+      <tbody>
+        <tr><td>Universal</td><td><code>*</code></td><td>todo</td></tr>
+        <tr><td>Tipo</td><td><code>p</code></td><td>todos los &lt;p&gt;</td></tr>
+        <tr><td>Clase</td><td><code>.alert</code></td><td>los que tienen esa clase</td></tr>
+        <tr><td>Id</td><td><code>#header</code></td><td>el elemento con ese id</td></tr>
+        <tr><td>Agrupación</td><td><code>h1, p</code></td><td>varios a la vez</td></tr>
+        <tr><td>Atributo</td><td><code>[href^="https"]</code></td><td>según atributo y valor</td></tr>
+        <tr><td>Descendiente</td><td><code>div p</code></td><td>p dentro de div (cualquier nivel)</td></tr>
+        <tr><td>Hijo</td><td><code>ul &gt; li</code></td><td>li hijos directos de ul</td></tr>
+      </tbody></table></div>
+    <div class="scroll"><table class="tbl">
+      <thead><tr><th>Selector</th><th>Ejemplo</th><th>Selecciona</th></tr></thead>
+      <tbody>
+        <tr><td>Adyacente</td><td><code>h2 + p</code></td><td>el p justo después de h2</td></tr>
+        <tr><td>Hermano general</td><td><code>h2 ~ p</code></td><td>todos los p posteriores</td></tr>
+        <tr><td>Estado</td><td><code>a:hover</code></td><td>ratón encima</td></tr>
+        <tr><td>Posición</td><td><code>li:first-child</code></td><td>primer hijo</td></tr>
+        <tr><td>Posición</td><td><code>tr:nth-child(odd)</code></td><td>filas impares</td></tr>
+        <tr><td>Negación</td><td><code>p:not(.nota)</code></td><td>p sin la clase nota</td></tr>
+        <tr><td>Pseudo-elemento</td><td><code>p::first-line</code></td><td>primera línea</td></tr>
+        <tr><td>Pseudo-elemento</td><td><code>h1::before</code></td><td>contenido antes</td></tr>
+      </tbody></table></div>
+  </div>
+</div></div>
+</section><section class="slide" data-title="Ejercicio Ej_CSS_02" data-block="Selectores">
+<div class="inner"><div class="wrap">
+  <h2>Ejercicio Ej_CSS_02: practica con selectores</h2>
+  <p>El enunciado está en el Drive de la asignatura. Antes de empezar, repasa con estas preguntas:</p>
+  <ol>
+    <li>¿Qué selector usarías para dar estilo a <strong>todos</strong> los párrafos? ¿Y solo a <strong>uno</strong>?</li>
+    <li>¿Cómo seleccionarías las celdas que están solo en el <code>&lt;tfoot&gt;</code> de una tabla? <span class="small">(<code>tfoot td</code>)</span></li>
+    <li>¿Qué diferencia hay entre <code>div p</code> y <code>div &gt; p</code>?</li>
+    <li>Si dos reglas se contradicen, ¿cuál gana?</li>
+  </ol>
+  <div class="note"><p><strong>Consejo:</strong> abre el navegador, pulsa F12 y mira la pestaña <em>Elementos</em>. Verás qué reglas CSS afectan a cada elemento y cuáles se están «tachando» porque otra gana.</p></div>
+</div></div>
+</section><section class="slide " data-title="Resumen" data-block="Cierre">
+<div class="inner"><div class="wrap">
+<h2>Resumen</h2><div class="cols3"><div><h3>Cascada</h3><p>Gana la regla más específica; con igual peso, la última. Evita <code>!important</code>.</p></div><div><h3>Prioridad</h3><p>navegador &lt; CSS externo/interno &lt; atributo <code>style</code> &lt; <code>!important</code>.</p></div><div><h3>Selectores simples</h3><p>Etiqueta, <code>.clase</code>, <code>#id</code>, <code>*</code>, <code>[atributo]</code>.</p></div><div><h3>Jerárquicos</h3><p>Descendiente (espacio), hijo (<code>&gt;</code>), hermano adyacente (<code>+</code>) y general (<code>~</code>).</p></div><div><h3>Pseudo-clases</h3><p>Estado o posición: <code>:hover</code>, <code>:focus</code>, <code>:nth-child()</code>, <code>:not()</code>.</p></div><div><h3>Especificidad</h3><p>id &gt; clase/atributo/pseudo-clase &gt; etiqueta.</p></div></div>
+</div></div>
+</section>
+<section class="slide " data-title="Autoevaluación" data-block="Cierre">
+<div class="inner"><div class="wrap">
+<h2>Autoevaluación: ¿lo tienes claro?</h2><p class="small">Contesta mentalmente y luego despliega cada pregunta.</p><div class="cols2"><div><details class="qz"><summary>1. Un <code>p</code> tiene <code>style="color:red"</code> y el CSS dice <code>p { color: blue }</code>. ¿De qué color se ve?</summary><p>Rojo: el atributo <code>style</code> tiene más prioridad.</p></details><details class="qz"><summary>2. ¿Qué diferencia hay entre una clase y un id?</summary><p>La clase (<code>.nombre</code>) se puede repetir; el id (<code>#nombre</code>) es único en la página.</p></details><details class="qz"><summary>3. ¿Qué diferencia hay entre <code>ul li</code> y <code>ul &gt; li</code>?</summary><p><code>ul li</code>: cualquier li dentro del ul, a cualquier nivel. <code>ul &gt; li</code>: solo los hijos directos.</p></details></div><div><details class="qz"><summary>4. ¿Qué selecciona <code>a[href$=".pdf"]</code>?</summary><p>Los enlaces cuyo <code>href</code> termina en «.pdf».</p></details><details class="qz"><summary>5. ¿Qué especificidad gana: <code>#menu</code> o <code>div.principal p.texto</code>?</summary><p><code>#menu</code>: un id vence a cualquier número de clases y etiquetas.</p></details><details class="qz"><summary>6. ¿En qué orden se escriben las pseudo-clases de los enlaces?</summary><p><code>:link</code>, <code>:visited</code>, <code>:hover</code>, <code>:active</code> (LoVe HAte).</p></details></div></div>
+</div></div>
+</section>
+<section class="slide dark" data-title="Siguiente parte" data-block="Cierre">
+<div class="inner"><div class="wrap">
+<h2>Siguiente: parte 3 · Unidades, colores y estilo de elementos</h2><p class="lead">Ya sabes elegir elementos. Ahora aprenderás a darles estilo: <strong>unidades, colores</strong> y las propiedades de texto, enlaces, listas y tablas.</p><div class="cols2"><ol class="series"><li>Introducción y sintaxis</li><li>Cascada y selectores</li><li class="cur">Unidades, colores y estilo de elementos</li><li>Modelo de cajas</li><li>Maquetación y Flexbox</li><li>Diseño adaptativo y Grid</li><li>Formularios</li></ol><div class="note"><p>Antes de pasar a la siguiente parte, haz los ejercicios y repasa la autoevaluación. En CSS se aprende escribiendo: abre el navegador, prueba y rompe cosas.</p></div></div>
+</div></div>
+</section>
+
+</div><!-- /#deck -->
+
+<!-- HUD -->
+<div class="hud" role="navigation" aria-label="Navegación de la presentación">
+  <div class="prog" id="prog"></div>
+  <button id="bPrev" aria-label="Diapositiva anterior">◀</button>
+  <button id="bNext" aria-label="Diapositiva siguiente">▶</button>
+  <span class="cnt" id="cnt" aria-live="polite">1 / 1</span>
+  <span class="blk" id="blk"></span>
+  <button id="bTheme" aria-label="Cambiar entre tema claro y oscuro" title="Tema claro/oscuro">◐</button>
+  <button id="bToc" aria-label="Abrir índice">Índice</button>
+</div>
+<div class="toc" id="toc" role="dialog" aria-label="Índice de la presentación">
+  <div class="box">
+    <h2>Índice <button class="close" id="tocClose">Cerrar</button></h2>
+    <div id="tocBody"></div>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
+var sp=function(c,t){return '<span class="'+c+'">'+esc(t)+'</span>'};
+
+/* ---------- Resaltado de código ---------- */
+function hlCSS(src){
+  var out='',inDecl=false,re=/\/\*[\s\S]*?\*\/|[{}]|;|[^{};\/]+|\//g,m;
+  while((m=re.exec(src))){
+    var t=m[0];
+    if(t.indexOf('/*')===0){out+=sp('c',t);}
+    else if(t==='{'){inDecl=true;out+=esc(t);}
+    else if(t==='}'){inDecl=false;out+=esc(t);}
+    else if(t===';'||t==='/'){out+=esc(t);}
+    else if(!inDecl){
+      var mm=t.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      out+=esc(mm[1])+(mm[2]?sp('s',mm[2]):'')+esc(mm[3]);
+    } else {
+      var i=t.indexOf(':');
+      if(i<0){var w=t.match(/^(\s*)([\s\S]*?)(\s*)$/);out+=esc(w[1])+(w[2]?sp('v',w[2]):'')+esc(w[3]);}
+      else{
+        var p=t.slice(0,i).match(/^(\s*)([\s\S]*?)(\s*)$/), v=t.slice(i+1).match(/^(\s*)([\s\S]*?)(\s*)$/);
+        out+=esc(p[1])+sp('p',p[2])+esc(p[3])+':'+esc(v[1])+(v[2]?sp('v',v[2]):'')+esc(v[3]);
+      }
+    }
+  }
+  return out;
+}
+function hlHTML(src){
+  var re=/<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>/g,out='',last=0,m;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index));last=m.index+m[0].length;
+    var t=m[0];
+    if(t.indexOf('<!--')===0){out+=sp('c',t);continue;}
+    var mm=t.match(/^(<\/?)([a-zA-Z][\w-]*)([\s\S]*?)(\/?>)$/);
+    if(!mm){out+=esc(t);continue;}
+    var a='';
+    mm[3].replace(/(\s+)|([^\s=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|[^\s]+))?/g,function(x,ws,name,eq,val){
+      if(ws){a+=esc(ws);}else{a+=sp('a',name);if(eq){a+=esc(eq)+sp('q',val);}}
+      return x;
+    });
+    out+=esc(mm[1])+sp('t',mm[2])+a+esc(mm[4]);
+  }
+  return out+esc(src.slice(last));
+}
+window.__esc=esc;function codeBox(file,lang,text,cls){
+  var h=lang==='css'?hlCSS(text):lang==='html'?hlHTML(text):esc(text);
+  return '<div class="codebox'+(cls?' '+cls:'')+'">'+(file?'<div class="fname">'+esc(file)+'</div>':'')+'<pre><code>'+h+'</code></pre></div>';
+}
+window.__cb=codeBox;
+$$('script[type="text/x-code"]').forEach(function(s){
+  var txt=s.textContent.replace(/^\n+/,'').replace(/\s+$/,'');
+  var lines=txt.split('\n'),ind=1e9;
+  lines.forEach(function(l){if(l.trim()){ind=Math.min(ind,l.match(/^ */)[0].length)}});
+  if(ind===1e9)ind=0;
+  txt=lines.map(function(l){return l.slice(ind)}).join('\n');
+  var d=document.createElement('div');
+  d.innerHTML=codeBox(s.getAttribute('data-file'),s.getAttribute('data-lang'),txt);
+  s.parentNode.replaceChild(d.firstChild,s);
+});
+
+/* ---------- Navegación ---------- */
+var slides=$$('.slide'),N=slides.length,cur=0;
+var cnt=$('#cnt'),blk=$('#blk'),prog=$('#prog'),toc=$('#toc');
+function show(n){
+  n=Math.max(0,Math.min(N-1,n));
+  slides[cur].classList.remove('active');
+  cur=n;slides[cur].classList.add('active');
+  var inner=$('.inner',slides[cur]);if(inner)inner.scrollTop=0;
+  cnt.textContent=(cur+1)+' / '+N;
+  blk.textContent=slides[cur].getAttribute('data-title');
+  prog.style.width=((cur+1)/N*100)+'%';
+  $('#bPrev').disabled=cur===0;$('#bNext').disabled=cur===N-1;
+  try{history.replaceState(null,'','#'+(cur+1));}catch(e){}
+  $$('#tocBody button').forEach(function(b){b.classList.toggle('cur',+b.getAttribute('data-i')===cur)});
+}
+$('#bPrev').addEventListener('click',function(){show(cur-1)});
+$('#bNext').addEventListener('click',function(){show(cur+1)});
+
+/* Índice */
+(function(){
+  var body=$('#tocBody'),groups=[],map={};
+  slides.forEach(function(s,i){
+    var b=s.getAttribute('data-block');
+    if(!map[b]){map[b]={name:b,items:[]};groups.push(map[b]);}
+    map[b].items.push([i,s.getAttribute('data-title')]);
+  });
+  groups.forEach(function(g){
+    var h=document.createElement('h3');h.textContent=g.name;body.appendChild(h);
+    var l=document.createElement('div');l.className='list';
+    g.items.forEach(function(it){
+      var b=document.createElement('button');b.type='button';b.setAttribute('data-i',it[0]);
+      b.textContent=(it[0]+1)+'. '+it[1];
+      b.addEventListener('click',function(){closeToc();show(it[0]);});
+      l.appendChild(b);
+    });
+    body.appendChild(l);
+  });
+})();
+function openToc(){toc.classList.add('open');$('#tocClose').focus();}
+function closeToc(){toc.classList.remove('open');}
+$('#bToc').addEventListener('click',openToc);
+$('#tocClose').addEventListener('click',closeToc);
+
+/* Tema */
+$('#bTheme').addEventListener('click',function(){
+  var r=document.documentElement,t=r.getAttribute('data-theme');
+  var dark=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+  r.setAttribute('data-theme',dark?'light':'dark');
+});
+
+/* Teclado */
+document.addEventListener('keydown',function(e){
+  var tg=e.target,tag=tg&&tg.tagName;
+  if(e.key==='Escape'){closeToc();return;}
+  if(toc.classList.contains('open'))return;
+  if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA')return;
+  if(e.altKey||e.ctrlKey||e.metaKey)return;
+  var k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'){e.preventDefault();show(cur+1);}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();show(cur-1);}
+  else if(k==='Home'){show(0);}
+  else if(k==='End'){show(N-1);}
+  else if(k===' '&&tag!=='BUTTON'&&tag!=='A'&&tag!=='SUMMARY'){e.preventDefault();show(cur+(e.shiftKey?-1:1));}
+});
+/* Gestos táctiles */
+var tx=0,ty=0,tOK=false;
+$('#deck').addEventListener('touchstart',function(e){
+  var t=e.touches[0];tx=t.clientX;ty=t.clientY;
+  tOK=!e.target.closest('input,select,textarea,pre,.scroll,.sw,.wheel');
+},{passive:true});
+$('#deck').addEventListener('touchend',function(e){
+  if(!tOK)return;var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(Math.abs(dx)>70&&Math.abs(dy)<60){show(cur+(dx<0?1:-1));}
+},{passive:true});
+
+var start=0;
+try{var h=parseInt(location.hash.replace('#',''),10);if(h>=1&&h<=N)start=h-1;}catch(e){}
+show(start);
+window.addEventListener('hashchange',function(){var h=parseInt(location.hash.replace('#',''),10);if(h>=1&&h<=N&&h-1!==cur)show(h-1);});
+
+/* ---------- Demo: carta con y sin CSS ---------- */
+(function(){
+  var b=$('#cafeBtn'),c=$('#cafe');if(!b||!c)return;
+  b.addEventListener('click',function(){
+    var on=c.classList.toggle('on');
+    b.setAttribute('aria-pressed',on);
+    b.textContent=on?'Desactivar CSS':'Activar CSS';
+  });
+})();
+
+/* ---------- Laboratorio de selectores ---------- */
+(function(){
+  var root=$('#labdom'),chipsBox=$('#chips'),inp=$('#selin'),res=$('#selres');if(!root)return;
+  var list=['p','.top','.nota','article p','article > p','article li','ul > li','article > li','p span','article > span','h2 + p','h2 + ul','h2 ~ p','li:first-child','li:last-child','li:nth-child(2)','p:not(.nota)'];
+  function clear(){$$('.hit',root).forEach(function(n){n.classList.remove('hit')});}
+  function apply(sel){
+    clear();res.className='';
+    if(!sel.trim()){res.textContent='';return;}
+    var nodes;
+    try{nodes=root.querySelectorAll(sel);}catch(e){res.className='err';res.textContent='Ese selector no es válido todavía. Revisa la sintaxis.';return;}
+    nodes.forEach(function(n){n.classList.add('hit')});
+    res.innerHTML=nodes.length?('<code>'+esc(sel)+'</code> selecciona <strong>'+nodes.length+'</strong> elemento'+(nodes.length>1?'s':'')+'.'):('<code>'+esc(sel)+'</code> <strong>no selecciona ningún elemento</strong> en este HTML.');
+  }
+  list.forEach(function(s){
+    var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=s;b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',function(){
+      var was=b.getAttribute('aria-pressed')==='true';
+      $$('.chip',chipsBox).forEach(function(c){c.setAttribute('aria-pressed','false')});
+      if(was){inp.value='';apply('');}else{b.setAttribute('aria-pressed','true');inp.value=s;apply(s);}
+    });
+    chipsBox.appendChild(b);
+  });
+  inp.addEventListener('input',function(){
+    $$('.chip',chipsBox).forEach(function(c){c.setAttribute('aria-pressed',c.textContent===inp.value?'true':'false')});
+    apply(inp.value);
+  });
+})();
+
+/* ---------- Unidades: contenedor ---------- */
+(function(){
+  var r=$('#uw'),o=$('#uwo'),b=$('#unitbox');if(!r)return;
+  function u(){b.style.width=r.value+'px';o.textContent=r.value+'px';}
+  r.addEventListener('input',u);u();
+})();
+
+/* ---------- Color: conversiones ---------- */
+function rgb2hsl(r,g,b){
+  r/=255;g/=255;b/=255;var mx=Math.max(r,g,b),mn=Math.min(r,g,b),h=0,s=0,l=(mx+mn)/2,d=mx-mn;
+  if(d){s=l>.5?d/(2-mx-mn):d/(mx+mn);
+    if(mx===r)h=(g-b)/d+(g<b?6:0);else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;}
+  return [Math.round(h),Math.round(s*100),Math.round(l*100)];
+}
+function hsl2rgb(h,s,l){
+  s/=100;l/=100;var a=s*Math.min(l,1-l);
+  function f(n){var k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,Math.min(9-k,1)))));}
+  return [f(0),f(8),f(4)];
+}
+function hex(r,g,b){return '#'+[r,g,b].map(function(x){return ('0'+x.toString(16)).slice(-2)}).join('').toUpperCase();}
+
+/* ---------- Mezclador RGB ---------- */
+(function(){
+  var R=$('#cr'),G=$('#cg'),B=$('#cb'),A=$('#ca');if(!R)return;
+  var sw=$('#rgbsw'),vals=$('#rgbvals');
+  function u(){
+    var r=+R.value,g=+G.value,b=+B.value,a=+A.value;
+    $('#cro').textContent=r;$('#cgo').textContent=g;$('#cbo').textContent=b;$('#cao').textContent=a;
+    sw.style.background='rgba('+r+','+g+','+b+','+a+')';
+    var h=rgb2hsl(r,g,b);
+    vals.innerHTML='<div><b>hex</b>'+hex(r,g,b)+'</div>'+
+      '<div><b>rgb</b>'+(a<1?'rgba('+r+', '+g+', '+b+', '+a+')':'rgb('+r+', '+g+', '+b+')')+'</div>'+
+      '<div><b>hsl</b>'+(a<1?'hsla('+h[0]+', '+h[1]+'%, '+h[2]+'%, '+a+')':'hsl('+h[0]+', '+h[1]+'%, '+h[2]+'%)')+'</div>';
+  }
+  [R,G,B,A].forEach(function(x){x.addEventListener('input',u)});u();
+})();
+
+/* ---------- Rueda HSL ---------- */
+(function(){
+  var H=$('#hh'),S=$('#hs'),L=$('#hl');if(!H)return;
+  var core=$('#wcore'),dot=$('#wdot'),vals=$('#hslvals');
+  function u(){
+    var h=+H.value,s=+S.value,l=+L.value;
+    $('#hho').textContent=h+'°';$('#hso').textContent=s+'%';$('#hlo').textContent=l+'%';
+    core.style.background='hsl('+h+','+s+'%,'+l+'%)';
+    var ang=h*Math.PI/180,x=75*Math.sin(ang),y=-75*Math.cos(ang);
+    dot.style.transform='translate('+x+'px,'+y+'px)';dot.style.background='hsl('+h+',100%,50%)';
+    var c=hsl2rgb(h,s,l);
+    vals.innerHTML='<div><b>hsl</b>hsl('+h+', '+s+'%, '+l+'%)</div><div><b>rgb</b>rgb('+c[0]+', '+c[1]+', '+c[2]+')</div><div><b>hex</b>'+hex(c[0],c[1],c[2])+'</div>';
+  }
+  [H,S,L].forEach(function(x){x.addEventListener('input',u)});u();
+})();
+
+/* ---------- Taller de texto ---------- */
+(function(){
+  var prev=$('#txtprev');if(!prev)return;
+  var ids=['ff','fs','fw','st','ta','td','tt','ls','lh','co'],e={};
+  ids.forEach(function(i){e[i]=$('#t_'+i)});
+  function u(){
+    var ff=e.ff.value,fs=e.fs.value+'px',fw=e.fw.value,st=e.st.value,ta=e.ta.value,td=e.td.value,tt=e.tt.value,ls=e.ls.value+'px',lh=e.lh.value,co=e.co.value;
+    prev.style.fontFamily=ff||'';prev.style.fontSize=fs;prev.style.fontWeight=fw;prev.style.fontStyle=st;
+    prev.style.textAlign=ta;prev.style.textDecoration=td;prev.style.textTransform=tt;
+    prev.style.letterSpacing=ls;prev.style.lineHeight=lh;prev.style.color=co;
+    $('#t_fso').textContent=fs;$('#t_lso').textContent=ls;$('#t_lho').textContent=lh;$('#t_coo').textContent=co;
+    var c='p {\n';
+    if(ff)c+='  font-family: '+ff+';\n';
+    c+='  font-size: '+fs+';\n';
+    if(fw!=='normal')c+='  font-weight: '+fw+';\n';
+    if(st!=='normal')c+='  font-style: '+st+';\n';
+    if(ta!=='left')c+='  text-align: '+ta+';\n';
+    if(td!=='none')c+='  text-decoration: '+td+';\n';
+    if(tt!=='none')c+='  text-transform: '+tt+';\n';
+    if(e.ls.value!=='0')c+='  letter-spacing: '+ls+';\n';
+    c+='  line-height: '+lh+';\n';
+    c+='  color: '+co+';\n}';
+    $('#txtcode').innerHTML=codeBox('estilos.css','css',c);
+  }
+  ids.forEach(function(i){e[i].addEventListener('input',u);e[i].addEventListener('change',u)});u();
+})();
+
+/* ---------- Columnas ---------- */
+(function(){
+  var n=$('#c_n'),g=$('#c_g'),p=$('#colprev');if(!n)return;
+  function u(){
+    p.style.columnCount=n.value;p.style.columnGap=g.value+'px';
+    $('#c_no').textContent=n.value;$('#c_go').textContent=g.value+'px';
+    $('#colcode').innerHTML=codeBox('estilos.css','css','p {\n  column-count: '+n.value+';\n  column-gap: '+g.value+'px;\n  column-rule: 2px solid teal;\n}');
+  }
+  n.addEventListener('input',u);g.addEventListener('input',u);u();
+})();
+
+/* ---------- Tablas ---------- */
+(function(){
+  var t=$('#tbl');if(!t)return;
+  var st={bc:'separate',ec:'show',cs:'top'},sp=$('#tb_sp');
+  function u(){
+    t.style.borderCollapse=st.bc;t.style.borderSpacing=sp.value+'px';t.style.emptyCells=st.ec;t.style.captionSide=st.cs;
+    $('#tb_spo').textContent=sp.value+'px';sp.disabled=st.bc==='collapse';
+    var c='table {\n  border-collapse: '+st.bc+';\n';
+    if(st.bc==='separate')c+='  border-spacing: '+sp.value+'px;\n  empty-cells: '+st.ec+';\n';
+    c+='  caption-side: '+st.cs+';\n}';
+    $('#tbcode').innerHTML=codeBox('estilos.css','css',c)+(st.bc==='collapse'?'<p class="small">Con <code>collapse</code>, <code>border-spacing</code> y <code>empty-cells</code> no tienen efecto: los bordes ya están unidos.</p>':'');
+  }
+  [['#tb_bc','bc'],['#tb_ec','ec'],['#tb_cs','cs']].forEach(function(p){
+    var box=$(p[0]);
+    $$('button',box).forEach(function(b){
+      b.addEventListener('click',function(){
+        st[p[1]]=b.getAttribute('data-v');
+        $$('button',box).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+        u();
+      });
+    });
+  });
+  sp.addEventListener('input',u);u();
+})();
+
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=window.__esc, cb=window.__cb;
+function code(id,file,txt,lang){var el=$(id);if(el)el.innerHTML=cb(file||'estilos.css',lang||'css',txt,'sm');}
+function seg(id,fn,init){
+  var box=$(id);if(!box)return;
+  $$('button',box).forEach(function(b){
+    b.addEventListener('click',function(){
+      $$('button',box).forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+      fn(b.getAttribute('data-v'));
+    });
+  });
+}
+function segVal(id){var b=$('button[aria-pressed="true"]',$(id));return b?b.getAttribute('data-v'):''}
+function out(id,v){var e=$(id);if(e)e.textContent=v}
+
+/* ===== Explorador de caja ===== */
+(function(){
+  var W=$('#bx_w'),P=$('#bx_p'),Bd=$('#bx_b'),M=$('#bx_m');if(!W)return;
+  function u(){
+    var w=+W.value,p=+P.value,b=+Bd.value,m=+M.value,sz=segVal('#bx_sz');
+    out('#bx_wo',w+'px');out('#bx_po',p+'px');out('#bx_bo',b+'px');out('#bx_mo',m+'px');
+    var cw=sz==='border-box'?Math.max(0,w-2*p-2*b):w;
+    $('#bxM').style.padding=m+'px';$('#bxB').style.padding=b+'px';$('#bxP').style.padding=p+'px';$('#bxC').style.width=cw+'px';
+    var tot=cw+2*p+2*b;
+    $('#bxread').innerHTML='<div><b>contenido</b>'+cw+'px</div><div><b>caja</b>'+tot+'px (contenido + padding + borde)</div><div><b>total</b>'+(tot+2*m)+'px con márgenes</div>';
+    code('#bxcode','estilos.css','.caja {\n  box-sizing: '+sz+';\n  width: '+w+'px;\n  padding: '+p+'px;\n  border: '+b+'px solid #555;\n  margin: '+m+'px;\n}');
+  }
+  [W,P,Bd,M].forEach(function(x){x.addEventListener('input',u)});seg('#bx_sz',u);u();
+})();
+
+/* ===== margin shorthand ===== */
+(function(){
+  var inp=$('#mg_in'),chips=$('#mg_chips'),R=$('#mgR');if(!inp)return;
+  ['10px','10px 30px','10px 30px 50px','10px 30px 50px 70px','0 auto'].forEach(function(s){
+    var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=s;
+    b.addEventListener('click',function(){inp.value=s;u();});chips.appendChild(b);
+  });
+  function u(){
+    var t=inp.value.trim().replace(/;$/,'').split(/\s+/),res=$('#mg_res');
+    if(!t[0]||t.length>4){res.textContent='Escribe entre 1 y 4 valores, por ejemplo: 10px 20px';res.style.color='var(--accent)';return;}
+    var v=t.map(function(x){return x==='auto'?'0px':x});
+    for(var i=0;i<v.length;i++){if(!/^-?\d+(\.\d+)?(px)?$/.test(v[i])){res.textContent='Solo se admiten valores en px (o auto) en esta demo.';res.style.color='var(--accent)';return;}}
+    v=v.map(function(x){return /px$/.test(x)?x:x+'px'});
+    var T,Rr,Bm,L;
+    if(v.length===1){T=Rr=Bm=L=v[0]}else if(v.length===2){T=Bm=v[0];Rr=L=v[1]}else if(v.length===3){T=v[0];Rr=L=v[1];Bm=v[2]}else{T=v[0];Rr=v[1];Bm=v[2];L=v[3]}
+    var n=function(x){return Math.max(0,parseFloat(x))};
+    R.style.padding=n(T)+'px '+n(Rr)+'px '+n(Bm)+'px '+n(L)+'px';
+    res.style.color='';res.innerHTML='arriba <b>'+T+'</b> · derecha <b>'+Rr+'</b> · abajo <b>'+Bm+'</b> · izquierda <b>'+L+'</b>'+(t.indexOf('auto')>=0?' <i>(auto centra la caja si tiene width; aquí se muestra como 0)</i>':'');
+  }
+  inp.addEventListener('input',u);u();
+})();
+
+/* ===== fusión de márgenes ===== */
+(function(){
+  var a=$('#mc_a'),b=$('#mc_b'),C=$('#mcC');if(!a)return;
+  function u(){
+    var ma=+a.value,mb=+b.value,mode=segVal('#mc_mode');
+    out('#mc_ao',ma+'px');out('#mc_bo',mb+'px');
+    $('#mcA').style.marginBottom=ma+'px';$('#mcB').style.marginTop=mb+'px';
+    if(mode==='flex'){C.style.display='flex';C.style.flexDirection='column';}
+    else{C.style.display='flow-root';C.style.flexDirection='';}
+    var gap=Math.round($('#mcB').getBoundingClientRect().top-$('#mcA').getBoundingClientRect().bottom);
+    $('#mcRead').innerHTML='<div><b>suma</b>'+(ma+mb)+'px</div><div><b>real</b>'+gap+'px '+(mode==='flex'?'(sin fusión)':'(fusionados: gana el mayor)')+'</div>';
+  }
+  a.addEventListener('input',u);b.addEventListener('input',u);seg('#mc_mode',u);u();
+})();
+
+/* ===== border-radius ===== */
+(function(){
+  var r=$('#br_r');if(!r)return;
+  function u(){$('#br_box').style.borderRadius=r.value+'px';out('#br_ro',r.value+'px');}
+  r.addEventListener('input',u);u();
+})();
+
+/* ===== box-sizing comparativa ===== */
+(function(){
+  var e1=$('#bs1'),e2=$('#bs2');if(!e1)return;
+  function u(){$('#bsRead').innerHTML='<div><b>content-box</b>ocupa '+e1.offsetWidth+'px</div><div><b>border-box</b>ocupa '+e2.offsetWidth+'px</div>';}
+  u();window.addEventListener('resize',u);
+  document.addEventListener('click',function(){setTimeout(u,50)});
+})();
+
+/* ===== fondo ===== */
+(function(){
+  var rep=$('#bg_rep'),pos=$('#bg_pos'),sz=$('#bg_size'),el=$('#bgst');if(!rep)return;
+  function u(){
+    el.style.backgroundRepeat=rep.value;el.style.backgroundPosition=pos.value;el.style.backgroundSize=sz.value;
+    code('#bgcode','estilos.css','.caja {\n  background-color: #DCEFEA;\n  background-image: url("logo.svg");\n  background-repeat: '+rep.value+';\n  background-position: '+pos.value+';\n  background-size: '+sz.value+';\n}');
+  }
+  [rep,pos,sz].forEach(function(x){x.addEventListener('change',u)});u();
+})();
+
+/* ===== display / visibility ===== */
+(function(){
+  var d=$('#ds_d'),v=$('#ds_v'),B=$('#dsB');if(!d)return;
+  function u(){
+    B.style.display=d.value;B.style.visibility=v.value;
+    code('#dsCode','estilos.css','#B {\n  display: '+d.value+';\n  visibility: '+v.value+';\n}');
+  }
+  d.addEventListener('change',u);v.addEventListener('change',u);u();
+})();
+
+/* ===== overflow ===== */
+(function(){
+  var s=$('#ov_v'),b=$('#ovbox');if(!s)return;
+  s.addEventListener('change',function(){b.style.overflow=s.value});
+})();
+
+/* ===== z-index ===== */
+(function(){
+  var r=$('#z_r'),g=$('#z_g'),b=$('#z_b');if(!r)return;
+  function u(){
+    var pos=segVal('#z_pos');
+    out('#z_ro',r.value);out('#z_go',g.value);out('#z_bo',b.value);
+    var R=$('#zR');R.style.position=pos;R.style.zIndex=r.value;
+    $('#zG').style.zIndex=g.value;$('#zB').style.zIndex=b.value;
+    code('#zCode','estilos.css','.roja  { position: '+pos+'; z-index: '+r.value+'; }\n.verde { position: absolute; z-index: '+g.value+'; }\n.azul  { position: absolute; z-index: '+b.value+'; }');
+  }
+  [r,g,b].forEach(function(x){x.addEventListener('input',u)});seg('#z_pos',u);u();
+})();
+
+/* ===== posicionamiento ===== */
+(function(){
+  var p=$('#ps_pos'),t=$('#ps_t'),l=$('#ps_l'),T=$('#psT');if(!p)return;
+  function u(){
+    T.style.position=p.value;
+    var off=p.value!=='static';
+    T.style.top=off?t.value+'px':'';T.style.left=(off&&p.value!=='sticky')?l.value+'px':'';
+    out('#ps_to',t.value+'px');out('#ps_lo',l.value+'px');
+    var c='.objetivo {\n  position: '+p.value+';\n';
+    if(off)c+='  top: '+t.value+'px;\n';
+    if(off&&p.value!=='sticky')c+='  left: '+l.value+'px;\n';
+    code('#psCode','estilos.css',c+'}');
+  }
+  p.addEventListener('change',u);t.addEventListener('input',u);l.addEventListener('input',u);u();
+})();
+
+/* ===== display:flex on/off ===== */
+(function(){
+  var b=$('#fxOn'),d=$('#fxDemo1');if(!b)return;
+  b.addEventListener('click',function(){
+    var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);
+    d.style.display=on?'flex':'';d.style.gap=on?'6px':'';
+    b.textContent=on?'Desactivar display: flex':'Activar display: flex';
+  });
+})();
+
+/* ===== laboratorio contenedor flex ===== */
+(function(){
+  var C=$('#fxC');if(!C)return;
+  var ids=['n','dir','wrap','jc','ai','ac','gap','w'],e={};ids.forEach(function(i){e[i]=$('#fx_'+i)});
+  function build(n){
+    C.innerHTML='';
+    for(var i=1;i<=n;i++){var d=document.createElement('div');d.className='i';
+      var lines=(i%3)+1,t='';for(var k=0;k<lines;k++)t+=(k?'<br>':'')+i;d.innerHTML=t;C.appendChild(d);}
+  }
+  function u(){
+    var n=+e.n.value;if(C.children.length!==n)build(n);
+    out('#fx_no',n);out('#fx_gapo',e.gap.value+'px');out('#fx_wo',e.w.value+'px');
+    C.style.flexDirection=e.dir.value;C.style.flexWrap=e.wrap.value;C.style.justifyContent=e.jc.value;
+    C.style.alignItems=e.ai.value;C.style.alignContent=e.ac.value;C.style.gap=e.gap.value+'px';
+    $$('.i',C).forEach(function(x){x.style.width=(e.dir.value.indexOf('row')===0?e.w.value+'px':'')});
+    code('#fxCode','estilos.css','.contenedor {\n  display: flex;\n  flex-direction: '+e.dir.value+';\n  flex-wrap: '+e.wrap.value+';\n  justify-content: '+e.jc.value+';\n  align-items: '+e.ai.value+';\n  align-content: '+e.ac.value+';\n  gap: '+e.gap.value+'px;\n}');
+  }
+  ids.forEach(function(i){e[i].addEventListener('input',u);e[i].addEventListener('change',u)});u();
+})();
+
+/* ===== centrar ===== */
+(function(){
+  var b=$('#ctrBtn'),c=$('#ctrC');if(!b)return;
+  b.addEventListener('click',function(){
+    var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);
+    c.style.justifyContent=on?'center':'flex-start';c.style.alignItems=on?'center':'flex-start';
+    b.textContent=on?'Centrado activado':'Centrado desactivado';
+  });
+})();
+
+/* ===== laboratorio items flex ===== */
+(function(){
+  var C=$('#fiC');if(!C)return;
+  var st=[0,1,2,3].map(function(){return {order:0,as:'auto',g:0,s:1,b:90}});
+  var colors=['#9CC9F2','#BFE3C0','#F2C94C','#F8CBA0'];
+  for(var i=0;i<4;i++){var d=document.createElement('div');d.className='i';d.textContent=i+1;d.style.background=colors[i];C.appendChild(d);}
+  var sel=$('#fi_sel'),o=$('#fi_ord'),as=$('#fi_as'),g=$('#fi_g'),s=$('#fi_s'),b=$('#fi_b');
+  function load(){var x=st[+sel.value];o.value=x.order;as.value=x.as;g.value=x.g;s.value=x.s;b.value=x.b;}
+  function render(){
+    var k=+sel.value;st[k]={order:+o.value,as:as.value,g:+g.value,s:+s.value,b:+b.value};
+    out('#fi_ordo',o.value);out('#fi_go',g.value);out('#fi_so',s.value);out('#fi_bo',b.value+'px');
+    $$('.i',C).forEach(function(el,i){
+      var x=st[i];el.style.order=x.order;el.style.alignSelf=x.as;el.style.flexGrow=x.g;el.style.flexShrink=x.s;el.style.flexBasis=x.b+'px';
+      el.style.outline=i===k?'3px solid #BF3A2A':'';
+    });
+    C.style.width=segVal('#fi_cw');
+    var x=st[k];
+    code('#fiCode','estilos.css','.item'+(k+1)+' {\n  order: '+x.order+';\n  align-self: '+x.as+';\n  flex: '+x.g+' '+x.s+' '+x.b+'px;\n}');
+  }
+  sel.addEventListener('change',function(){load();render();});
+  [o,as,g,s,b].forEach(function(x){x.addEventListener('input',render);x.addEventListener('change',render)});
+  seg('#fi_cw',render);load();render();
+})();
+
+/* ===== ejemplo de página flex: móvil/escritorio ===== */
+(function(){
+  var b=$('#pgBtn'),mid=$('#pgMid'),w=$('#pgWrap');if(!b)return;
+  b.addEventListener('click',function(){
+    var m=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',m);
+    b.textContent=m?'Ver como escritorio':'Ver como móvil';
+    mid.style.flexDirection=m?'column':'row';
+    $$('#pgMid>div').forEach(function(x){x.style.flex=m?'0 0 auto':''});
+    if(!m){var ch=$$('#pgMid>div');ch[0].style.flex='0 0 90px';ch[1].style.flex='1';ch[2].style.flex='0 0 90px';}
+    w.style.maxWidth=m?'260px':'';w.style.margin=m?'0 auto':'';
+  });
+})();
+
+/* ===== simuladores container (rs / gallery / form) ===== */
+(function(){
+  var r=$('#rs_w'),w=$('#rsWrap');if(!r)return;
+  function u(){w.style.width=r.value+'px';out('#rs_wo',r.value+'px');}
+  r.addEventListener('input',u);u();
+})();
+(function(){
+  var r=$('#fr_w'),w=$('#frWrap');if(!r)return;
+  function u(){w.style.width=r.value+'px';out('#fr_wo',r.value+'px');}
+  r.addEventListener('input',u);u();
+})();
+(function(){
+  var r=$('#ga_w'),n=$('#ga_n'),w=$('#gaWrap'),g=$('#gaG');if(!r)return;
+  function u(){
+    w.style.width=r.value+'px';out('#ga_wo',r.value+'px');out('#ga_no',n.value);
+    if(g.children.length!=+n.value){g.innerHTML='';for(var i=1;i<=+n.value;i++){var d=document.createElement('div');d.textContent='foto '+i;g.appendChild(d);}}
+    var cols=getComputedStyle(g).gridTemplateColumns.split(' ').length;
+  }
+  r.addEventListener('input',u);n.addEventListener('input',u);u();
+})();
+
+/* ===== grid: inline-grid ===== */
+(function(){
+  var c=$('#giC');if(!c)return;
+  seg('#gi_d',function(v){c.style.display=v});
+})();
+
+/* ===== laboratorio grid ===== */
+(function(){
+  var C=$('#gdC');if(!C)return;
+  var cols=$('#gd_cols'),rows=$('#gd_rows'),gap=$('#gd_gap'),jc=$('#gd_jc'),ac=$('#gd_ac'),err=$('#gd_err');
+  for(var i=1;i<=9;i++){var d=document.createElement('div');d.className='i';d.textContent=i;C.appendChild(d);}
+  var chips=$('#gd_chips');
+  [['repeat(3, 1fr)','60px 60px'],['100px 1fr 2fr','50px auto'],['repeat(2, 80px)','repeat(3, 50px)'],['repeat(auto-fit, minmax(90px, 1fr))','auto']].forEach(function(p){
+    var b=document.createElement('button');b.type='button';b.className='chip';b.textContent=p[0];
+    b.addEventListener('click',function(){cols.value=p[0];rows.value=p[1];u();});chips.appendChild(b);
+  });
+  function set(prop,val,label){
+    C.style[prop]='';C.style[prop]=val;
+    if(val&&C.style[prop]===''){return label+' no es un valor válido.';}
+    return '';
+  }
+  function u(){
+    var m=set('gridTemplateColumns',cols.value,'grid-template-columns')||set('gridTemplateRows',rows.value,'grid-template-rows');
+    err.textContent=m;
+    C.style.gap=gap.value+'px';out('#gd_gapo',gap.value+'px');C.style.justifyContent=jc.value;C.style.alignContent=ac.value;
+    code('#gdCode','estilos.css','.contenedor {\n  display: grid;\n  grid-template-columns: '+cols.value+';\n  grid-template-rows: '+rows.value+';\n  gap: '+gap.value+'px;\n  justify-content: '+jc.value+';\n  align-content: '+ac.value+';\n}');
+  }
+  [cols,rows,gap].forEach(function(x){x.addEventListener('input',u)});[jc,ac].forEach(function(x){x.addEventListener('change',u)});u();
+})();
+
+/* ===== colocación en grid ===== */
+(function(){
+  var C=$('#gpC');if(!C)return;
+  C.style.gridTemplateColumns='repeat(3, 1fr)';C.style.gridTemplateRows='repeat(3, 1fr)';C.style.gap='6px';
+  var A=document.createElement('div');A.className='i sel';A.textContent='A';C.appendChild(A);
+  for(var i=1;i<=8;i++){var d=document.createElement('div');d.className='i';d.textContent=i;C.appendChild(d);}
+  var cs=$('#gp_cs'),ce=$('#gp_ce'),rs=$('#gp_rs'),re=$('#gp_re');
+  function u(){
+    var c1=+cs.value,c2=+ce.value,r1=+rs.value,r2=+re.value;
+    A.style.gridColumn=c1+' / '+c2;A.style.gridRow=r1+' / '+r2;
+    var cc=c2-c1,rr=r2-r1;
+    code('#gpCode','estilos.css','.A {\n  grid-column: '+c1+' / '+c2+';'+(cc>0?'  /* ocupa '+cc+' columna'+(cc>1?'s':'')+' */':'')+'\n  grid-row: '+r1+' / '+r2+';'+(rr>0?'  /* ocupa '+rr+' fila'+(rr>1?'s':'')+' */':'')+'\n}');
+  }
+  [cs,ce,rs,re].forEach(function(x){x.addEventListener('change',u)});u();
+})();
+
+/* ===== grid areas ===== */
+(function(){
+  var C=$('#arC');if(!C)return;
+  function u(v){
+    if(v==='d'){C.style.gridTemplateColumns='90px 1fr 90px';C.style.gridTemplateAreas='"cabecera cabecera cabecera" "menu centro lateral" "pie pie pie"';
+      code('#arCode','estilos.css','grid-template-columns: 140px 1fr 140px;\ngrid-template-areas:\n  "cabecera cabecera cabecera"\n  "menu     centro   lateral"\n  "pie      pie      pie";');}
+    else{C.style.gridTemplateColumns='1fr';C.style.gridTemplateAreas='"cabecera" "menu" "centro" "lateral" "pie"';
+      code('#arCode','estilos.css','@media (max-width: 639px) {\n  .pagina {\n    grid-template-columns: 1fr;\n    grid-template-areas:\n      "cabecera"\n      "menu"\n      "centro"\n      "lateral"\n      "pie";\n  }\n}');}
+  }
+  seg('#ar_m',u);u('d');
+})();
+
+/* ===== formularios ===== */
+(function(){
+  var m=$('#gp_m');if(!m)return;
+  var n=$('#gp_n'),a=$('#gp_a'),g=$('#gp_g');
+  function u(){
+    var q=new URLSearchParams({nombre:n.value,apellidos:a.value,genero:g.value}).toString();
+    var meth=segVal('#gp_m');
+    $('#gp_out').innerHTML=meth==='get'
+      ?'<b>GET</b> https://sitio.eus/formulario/servicio.php?'+esc(q)+'\n<b>Cuerpo de la petición:</b> (vacío)'
+      :'<b>POST</b> https://sitio.eus/formulario/servicio.php\n<b>Cuerpo de la petición:</b> '+esc(q);
+  }
+  [n,a].forEach(function(x){x.addEventListener('input',u)});g.addEventListener('change',u);seg('#gp_m',u);u();
+})();
+(function(){
+  var t=$('#in_t');if(!t)return;
+  function u(){
+    var v=t.value,box=$('#in_prev');box.innerHTML='';
+    var i=document.createElement('input');i.type=v;i.name='campo';i.id='in_demo';
+    if(v==='checkbox'||v==='radio'){i.value='si';var l=document.createElement('label');l.htmlFor='in_demo';l.style.display='inline';l.style.fontWeight='400';l.textContent=' Opción';box.appendChild(i);box.appendChild(l);}
+    else{if(v==='text'||v==='search'||v==='email'||v==='url'||v==='tel'||v==='password')i.placeholder='Escribe aquí';if(v==='number'){i.min=0;i.max=10;}box.appendChild(i);}
+    code('#in_code','index.html','<input type="'+v+'" name="campo"'+(v==='number'?' min="0" max="10"':'')+(i.placeholder?' placeholder="Escribe aquí"':'')+'>','html');
+  }
+  t.addEventListener('change',u);u();
+})();
+(function(){
+  /* envíos de demo: nunca navegan */
+  document.addEventListener('submit',function(e){
+    e.preventDefault();
+    var f=e.target;if(!f||f.tagName!=='FORM')return;
+    var o=f.parentNode&&$('.fdout',f.parentNode);
+    if(!o)return;
+    var fd=new FormData(f),pairs=[];
+    fd.forEach(function(v,k){pairs.push([k,typeof v==='string'?v:v.name])});
+    o.innerHTML=pairs.length?pairs.map(function(p){return '<b>'+esc(p[0])+'</b> = '+esc(p[1])}).join('\n'):'(No se envía ningún dato: ningún campo con name tiene valor.)';
+  });
+  document.addEventListener('reset',function(e){
+    var f=e.target,o=f.parentNode&&$('.fdout',f.parentNode);if(o)o.textContent='Los datos que se enviarían aparecerán aquí.';
+  });
+  var nv=$('#v_nv'),vf=$('#vForm');
+  if(nv&&vf)nv.addEventListener('change',function(){if(nv.checked)vf.setAttribute('novalidate','');else vf.removeAttribute('novalidate');});
+  var fb=$('#fcBtn'),ff=$('#fcForm');
+  if(fb&&ff)fb.addEventListener('click',function(){
+    var on=fb.getAttribute('aria-pressed')!=='true';fb.setAttribute('aria-pressed',on);
+    ff.classList.toggle('styled',on);fb.textContent=on?'Quitar CSS':'Aplicar CSS';
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
